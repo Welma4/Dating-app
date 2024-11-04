@@ -81,9 +81,9 @@ fun LoginScreen(
     mainViewModel: MainViewModel = viewModel(factory = MainViewModel.factory)
 ) {
 
-//    MaterialTheme {
-//        GradientBackground()
-//    }
+   MaterialTheme {
+       GradientBackground()
+    }
 
     Column(
         modifier = Modifier
