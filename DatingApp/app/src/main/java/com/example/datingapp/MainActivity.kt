@@ -82,7 +82,9 @@ fun LoginScreen(
 ) {
 
    MaterialTheme {
-       GradientBackground()
+       GradientBackground(
+
+       )
     }
 
     Column(
