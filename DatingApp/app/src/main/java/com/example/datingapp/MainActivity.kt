@@ -78,7 +78,6 @@ fun GradientBackground() {
 @Composable
 fun LoginScreen(
     navController: NavController,
-    mainViewModel: MainViewModel = viewModel(factory = MainViewModel.factory)
 ) {
 
    MaterialTheme {
