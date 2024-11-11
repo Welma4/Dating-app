@@ -1,4 +1,8 @@
 package com.example.datingapp
+
+import ProfileViewModel
+import android.app.DatePickerDialog
+import android.health.connect.datatypes.HeightRecord
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,10 +23,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -47,6 +56,23 @@ import com.example.datingapp.navigation.DatingApp
 import com.example.datingapp.ui.theme.DatingAppTheme
 import com.example.datingapp.ui.theme.poppinsFontFamily
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Outline
+import com.example.datingapp.data.UserEntity
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +80,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DatingAppTheme {
-                    DatingApp()
+                DatingApp()
             }
         }
     }
@@ -80,8 +106,8 @@ fun LoginScreen(
     navController: NavController,
 ) {
 
-   MaterialTheme {
-       GradientBackground()
+    MaterialTheme {
+        GradientBackground()
     }
 
     Column(
@@ -136,7 +162,7 @@ fun LoginScreen(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
-                )    {
+                ) {
                     Image(
                         painter = painterResource(id = R.drawable.google_logo),
                         contentDescription = "Google logo",
@@ -164,7 +190,7 @@ fun LoginScreen(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
-                )  {
+                ) {
                     Image(
                         painter = painterResource(id = R.drawable.email_logo),
                         contentDescription = "Email logo",
@@ -181,22 +207,29 @@ fun LoginScreen(
         }
 
         Spacer(modifier = Modifier.weight(1f))
-            Text(
-                modifier = Modifier
-                    .width(300.dp)
-                    .padding(bottom = 15.dp),
-                text = ("By signing in, you agree with our Terms & conditions."),
-                style = TextStyle(fontSize = 10.sp),
-                textAlign = TextAlign.Center,
-                fontFamily = poppinsFontFamily,
-                color = Color.White
-            )
+        Text(
+            modifier = Modifier
+                .width(300.dp)
+                .padding(bottom = 15.dp),
+            text = ("By signing in, you agree with our Terms & conditions."),
+            style = TextStyle(fontSize = 10.sp),
+            textAlign = TextAlign.Center,
+            fontFamily = poppinsFontFamily,
+            color = Color.White
+        )
     }
 }
 
-@Preview
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    navController: NavController,
+    viewModel: ProfileViewModel
+) {
+
+    val age = calculateAge(viewModel.user.value.birthDate)
+    val dateFormatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    val formattedDate = dateFormatter.format(viewModel.user.value.birthDate)
+
     val gradientColors = listOf(
         Color(0xFFA020F0),
         Color(0xFFBC7BE4)
@@ -234,7 +267,7 @@ fun ProfileScreen() {
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Jenny, 22",
+                    text = "${viewModel.user.value.firstName}, ${age}",
                     fontSize = 18.sp,
                     color = Color.White,
                     fontFamily = poppinsFontFamily
@@ -265,16 +298,17 @@ fun ProfileScreen() {
                     text = "Edit",
                     fontSize = 14.sp,
                     color = Color.Blue,
-                    modifier = Modifier.clickable { /* Логика для редактирования */ },
+                    modifier = Modifier.clickable { navController.navigate("EditProfileScreen") },
                     fontFamily = poppinsFontFamily
                 )
             }
 
-            ProfileField(label = "Name", value = "Jenny")
-            ProfileField(label = "Phone Number", value = "+91 9876543210")
-            ProfileField(label = "Date of birth", value = "02-05-1997")
-            ProfileField(label = "Email", value = "abcqwertyu@gmail.com")
-            ProfileField(label = "Location", value = "Switzerland")
+            ProfileField(label = "First name", value = viewModel.user.value.firstName)
+            ProfileField(label = "Second name", value = viewModel.user.value.secondName)
+            ProfileField(label = "Date of birth", value = formattedDate)
+            ProfileField(label = "Email", value = viewModel.user.value.emailAddress)
+            ProfileField(label = "Location", value = viewModel.user.value.location)
+            ProfileField(label = "Gender", viewModel.user.value.gender)
 
         }
     }
@@ -283,7 +317,7 @@ fun ProfileScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileField(label: String, value: String) {
-    Column(modifier = Modifier.padding(vertical = 10.dp)) {
+    Column(modifier = Modifier.padding(vertical = 6.dp)) {
         OutlinedTextField(
             value = value,
             onValueChange = {},
@@ -294,8 +328,15 @@ fun ProfileField(label: String, value: String) {
             textStyle = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = poppinsFontFamily
-                ),
-            label = { Text(text = label, fontSize = 12.sp, color = Color.Gray, fontFamily = poppinsFontFamily) },
+            ),
+            label = {
+                Text(
+                    text = label,
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    fontFamily = poppinsFontFamily
+                )
+            },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedLabelColor = Color.Gray,
                 focusedLabelColor = Color.Gray,
@@ -304,4 +345,208 @@ fun ProfileField(label: String, value: String) {
             )
         )
     }
+}
+
+@Composable
+fun EditProfileScreen(
+    navController: NavController,
+    viewModel: ProfileViewModel,
+    onSave: (UserEntity) -> Unit
+) {
+    var firstName by remember { mutableStateOf(viewModel.user.value.firstName) }
+    var secondName by remember { mutableStateOf(viewModel.user.value.secondName) }
+    val dateFormatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    var birthDate by remember { mutableStateOf(dateFormatter.format(viewModel.user.value.birthDate)) }
+    var location by remember { mutableStateOf(viewModel.user.value.location) }
+    var gender by remember { mutableStateOf(viewModel.user.value.gender.toString()) }
+
+
+    val calendar = remember { Calendar.getInstance() }
+    var selectedDate by remember { mutableStateOf(viewModel.user.value.birthDate) }
+
+    val datePickerDialog = DatePickerDialog(
+        navController.context, { _, year, month, dayOfMonth ->
+            calendar.set(year, month, dayOfMonth)
+            selectedDate = calendar.time // Обновляем дату
+            birthDate = dateFormatter.format(selectedDate) // Форматируем дату в нужный формат
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp)
+        ) {
+            IconButton(
+                onClick = { navController.navigate("ProfileScreen") },
+                modifier = Modifier.background(Color.Transparent)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Return to ProfileScreen",
+                    modifier = Modifier.size(30.dp)
+                )
+            }
+            Text(
+                text = "Edit Profile",
+                style = TextStyle(
+                    fontSize = 18.sp,
+                    fontFamily = poppinsFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                ),
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        EditableTextField(
+            fieldValue = firstName,
+            onValueChange = { firstName = it },
+            fieldName = "First name"
+        )
+        EditableTextField(
+            fieldValue = secondName,
+            onValueChange = { secondName = it },
+            fieldName = "Second name"
+        )
+        OutlinedTextField(
+            modifier = Modifier
+                .clickable { datePickerDialog.show() }
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            value = birthDate,
+            onValueChange = { birthDate = it },
+            label = { Text("Date of birth") },
+            readOnly = true,
+            trailingIcon = {
+                IconButton(onClick = { datePickerDialog.show() }) {
+                    Icon(imageVector = Icons.Default.DateRange, contentDescription = "Select date")
+                }
+            },
+        )
+        EditableTextField(
+            fieldValue = location,
+            onValueChange = { location = it },
+            fieldName = "Location"
+        )
+
+        GenderMenu(onValueChange = {gender = it})
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = {
+                val updatedUser = UserEntity(
+                    firstName = firstName,
+                    secondName = secondName,
+                    birthDate = selectedDate,
+                    location = location,
+                    gender = gender
+                )
+                onSave(updatedUser)
+                navController.navigate("ProfileScreen")
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAA3FEC)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+        ) {
+            Text(
+                text = "Save",
+                fontFamily = poppinsFontFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp,
+                color = Color.White
+            )
+        }
+    }
+}
+
+@Composable
+fun EditableTextField(
+    fieldValue: String,
+    onValueChange: (String) -> Unit,
+    fieldName: String
+) {
+    OutlinedTextField(
+        value = fieldValue,
+        onValueChange = onValueChange,
+        label = { Text(fieldName) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GenderMenu(onValueChange: (String) -> Unit) {
+    val options = listOf("Male", "Female")
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOptionText by remember { mutableStateOf(options[0]) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = {
+            expanded = !expanded
+        }
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth(),
+            readOnly = true,
+            value = selectedOptionText,
+            onValueChange = {},
+            label = { Text("Gender") },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = expanded
+                )
+            },
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            modifier = Modifier.fillMaxWidth(),
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { selectionOption ->
+                DropdownMenuItem(
+                    text = { Text(text = selectionOption) },
+                    onClick = {
+                        selectedOptionText = selectionOption
+                        expanded = false
+                        onValueChange(selectedOptionText)
+                    }
+                )
+            }
+        }
+    }
+}
+
+fun calculateAge(birthDate: Date): Int {
+    val currentCalendar = Calendar.getInstance()
+    val birthCalendar = Calendar.getInstance()
+    birthCalendar.time = birthDate
+
+    var age = currentCalendar.get(Calendar.YEAR) - birthCalendar.get(Calendar.YEAR)
+
+    if (currentCalendar.get(Calendar.MONTH) < birthCalendar.get(Calendar.MONTH) ||
+        (currentCalendar.get(Calendar.MONTH) == birthCalendar.get(Calendar.MONTH) &&
+                currentCalendar.get(Calendar.DAY_OF_MONTH) < birthCalendar.get(Calendar.DAY_OF_MONTH))) {
+        age--
+    }
+
+    return age
 }
