@@ -73,6 +73,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import javax.sql.RowSetWriter
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -157,7 +158,7 @@ fun LoginScreen(
                     .height(50.dp)
                     .clickable { },
                 colors = ButtonDefaults.buttonColors(Color.White),
-                onClick = { /* handle Google login */ },
+                onClick = { navController.navigate("ProfileScreen") },
                 border = BorderStroke(2.dp, Color(0xFFEBEAEC))
             ) {
                 Row(
@@ -186,7 +187,7 @@ fun LoginScreen(
                     .height(50.dp)
                     .clickable { },
                 colors = ButtonDefaults.buttonColors(Color.White),
-                onClick = { navController.navigate("ProfileScreen") },
+                onClick = { navController.navigate("SignInScreen") },
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
@@ -207,16 +208,23 @@ fun LoginScreen(
         }
 
         Spacer(modifier = Modifier.weight(1f))
-        Text(
-            modifier = Modifier
-                .width(300.dp)
-                .padding(bottom = 15.dp),
-            text = ("By signing in, you agree with our Terms & conditions."),
-            style = TextStyle(fontSize = 10.sp),
-            textAlign = TextAlign.Center,
-            fontFamily = poppinsFontFamily,
-            color = Color.White
-        )
+        Row(horizontalArrangement = Arrangement.Center) {
+            Text(
+                text = "Don't have account? ",
+                fontFamily = poppinsFontFamily,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.White
+            )
+            Text(
+                modifier = Modifier.clickable { navController.navigate("SignUpScreen") },
+                text = "Sign up",
+                fontFamily = poppinsFontFamily,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        }
     }
 }
 
