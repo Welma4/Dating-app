@@ -3,46 +3,67 @@ package com.example.datingapp.navigation
 import androidx.compose.runtime.Composable
 import ProfileViewModel
 import SignUpScreen
+import android.util.Log
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.datingapp.EditProfileScreen
-import com.example.datingapp.LoginScreen
-import com.example.datingapp.ProfileScreen
+import com.example.datingapp.data.Routes
+import com.example.datingapp.ui.screens.EditProfileScreen
+import com.example.datingapp.ui.screens.HomeScreen
+import com.example.datingapp.ui.screens.LoginScreen
+import com.example.datingapp.ui.screens.ProfileScreen
 import com.example.datingapp.ui.screens.SignInScreen
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @Composable
 fun DatingApp() {
     val navController = rememberNavController()
     val profileViewModel: ProfileViewModel = viewModel()
+    val auth = Firebase.auth
 
-    NavHost(navController, startDestination = "LoginScreen") {
+    NavHost(navController, startDestination = if (auth.currentUser != null) Routes.Profile else Routes.Login) {
+//    NavHost(navController, startDestination = Routes.Login) {
 
-        composable("SignUpScreen") {
-            SignUpScreen(navController)
+        composable(Routes.SignUp) {
+            SignUpScreen(navController, profileViewModel)
         }
 
-        composable("SignInScreen") {
+        composable(Routes.SignIn) {
             SignInScreen(navController)
         }
 
-        composable("LoginScreen") {
+        composable(Routes.Login) {
             LoginScreen(navController)
         }
-        composable("ProfileScreen") {
+
+        composable(Routes.Home) {
+            HomeScreen(navController)
+        }
+
+        composable(Routes.Profile) {
             ProfileScreen(
                 navController,
                 profileViewModel
             )
         }
-        composable("EditProfileScreen") {
+        composable(Routes.EditProfile) {
             EditProfileScreen(
                 viewModel = profileViewModel,
                 navController = navController,
                 onSave = { updatedUser ->
+                    profileViewModel.saveUserToFirestore(
+                        updatedUser.uid,
+                        updatedUser,
+                        onSuccess = {
+                            navController.navigate(Routes.Profile)
+                        },
+                        onFailure = { error ->
+                            Log.d("MyLog", error)
+                        }
+                    )
                     profileViewModel.updateUser(updatedUser)
-                    navController.popBackStack()
                 }
             )
         }

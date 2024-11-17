@@ -8,10 +8,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.datingapp.R
 
+val poppinsFontFamily = FontFamily(
+    Font(R.font.poppins_black, FontWeight.Black),
+    Font(R.font.poppins_bold, FontWeight.Bold),
+    Font(R.font.poppins_extra_bold, FontWeight.ExtraBold),
+    Font(R.font.poppins_extra_light, FontWeight.ExtraLight),
+    Font(R.font.poppins_light, FontWeight.Light),
+    Font(R.font.poppins_medium, FontWeight.Medium),
+    Font(R.font.poppins_regular, FontWeight.Normal),
+    Font(R.font.poppins_semibold, FontWeight.SemiBold),
+    Font(R.font.poppins_thin, FontWeight.Thin),
+)
+
 // Set of Material typography styles to start with
 val Typography = Typography(
     bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = poppinsFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
@@ -35,14 +47,3 @@ val Typography = Typography(
     */
 )
 
-val poppinsFontFamily = FontFamily(
-    Font(R.font.poppins_black, FontWeight.Black),
-    Font(R.font.poppins_bold, FontWeight.Bold),
-    Font(R.font.poppins_extra_bold, FontWeight.ExtraBold),
-    Font(R.font.poppins_extra_light, FontWeight.ExtraLight),
-    Font(R.font.poppins_light, FontWeight.Light),
-    Font(R.font.poppins_medium, FontWeight.Medium),
-    Font(R.font.poppins_regular, FontWeight.Normal),
-    Font(R.font.poppins_semibold, FontWeight.SemiBold),
-    Font(R.font.poppins_thin, FontWeight.Thin),
-)

@@ -1,5 +1,7 @@
 package com.example.datingapp.ui.screens
 
+import LoginTextField
+import PasswordField
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,9 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.datingapp.data.Routes
 import com.example.datingapp.ui.theme.poppinsFontFamily
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -25,6 +29,9 @@ import com.google.firebase.auth.auth
 fun SignInScreen(navController: NavController) {
     val auth = Firebase.auth
     Log.d("MyLog", "User email: ${auth.currentUser?.email}")
+
+    var errorState by remember { mutableStateOf("") }
+    var isEmailError by remember { mutableStateOf(false) }
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -40,7 +47,7 @@ fun SignInScreen(navController: NavController) {
                 .padding(vertical = 10.dp)
         ) {
             IconButton(
-                onClick = { navController.navigate("LoginScreen") },
+                onClick = { navController.navigate(Routes.Login) },
                 modifier = Modifier.background(Color.Transparent)
             ) {
                 Icon(
@@ -53,7 +60,7 @@ fun SignInScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 15.dp),
+                .padding(horizontal = 30.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -68,26 +75,42 @@ fun SignInScreen(navController: NavController) {
 
             Column(modifier = Modifier.width(300.dp)) {
 
-                TextField(
-                    value = email,
-                    placeholder = { Text("Email") },
-                    onValueChange = { email = it },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.White,
-                        focusedIndicatorColor = Color.Gray,
-                        unfocusedIndicatorColor = Color.Gray
-                    )
-                )
+                LoginTextField(value = email, label = "Email", isEmailError) { email = it }
+
                 PasswordField(password = password, onPasswordChange = { password = it })
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                if (errorState.isNotEmpty()) {
+                    Text(
+                        text = errorState,
+                        fontFamily = poppinsFontFamily,
+                        fontSize = 14.sp,
+                        color = Color.Red,
+                        textAlign = TextAlign.Center
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(50.dp))
 
                 Button(
-                    onClick = { signIn(auth, email, password) },
+                    onClick = {
+                        signIn(
+                            auth,
+                            email,
+                            password,
+                            onSignInSuccess = {
+                                navController.navigate(Routes.Profile)
+                            },
+                            onSignInFailure = { error ->
+                                errorState = error
+                            }
+                        )
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAA3FEC)),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp)
+                        .height(65.dp)
                         .padding(bottom = 10.dp)
                 ) {
                     Text(
@@ -103,32 +126,31 @@ fun SignInScreen(navController: NavController) {
     }
 }
 
+private fun signIn(
+    auth: FirebaseAuth,
+    email: String,
+    password: String,
+    onSignInSuccess: () -> Unit,
+    onSignInFailure: (String) -> Unit
+) {
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PasswordField(password: String, onPasswordChange: (String) -> Unit) {
-    TextField(
-        value = password,
-        onValueChange = onPasswordChange,
-        placeholder = { Text("Password") },
-        visualTransformation = PasswordVisualTransformation(),
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color.White,
-            focusedIndicatorColor = Color.Gray,
-            unfocusedIndicatorColor = Color.Gray
-        ),
-        modifier = Modifier
-            .padding(vertical = 8.dp)
-    )
-}
+    if (email.isBlank() || password.isBlank()) {
+        onSignInFailure("Email and password cannot be empty!")
+        return
+    }
 
-private fun signIn(auth: FirebaseAuth, email: String, password: String) {
     auth.signInWithEmailAndPassword(email, password)
-        .addOnCompleteListener {
-            if (it.isSuccessful) {
-                Log.d("Mylog", "SignIn is successful!")
-            } else {
-                Log.d("MyLog", "SignIn is failed!")
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                onSignInSuccess()
+                Log.d("MyLog", "SignIn is successful!")
             }
         }
+
+        .addOnFailureListener { task ->
+            onSignInFailure(task.message ?: "Sign In Error!")
+            Log.d("MyLog", "SignIn is failed!")
+        }
+
 }
+

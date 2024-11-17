@@ -8,30 +8,50 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.datingapp.data.Routes
+import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.theme.poppinsFontFamily
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(navController: NavController) {
+fun SignUpScreen(
+    navController: NavController,
+    viewModel: ProfileViewModel
+) {
+
     val auth = Firebase.auth
     Log.d("MyLog", "User email: ${auth.currentUser?.email}")
+    var errorState by remember { mutableStateOf("") }
+    var isFirstNameError by remember { mutableStateOf(false) }
+    var isSecondNameError by remember { mutableStateOf(false) }
+    var isBirthDateError by remember { mutableStateOf(false) }
+    var isLocationError by remember { mutableStateOf(false) }
+    var isEmailError by remember { mutableStateOf(false) }
+    var isPasswordError by remember { mutableStateOf(false) }
 
     var firstName by remember { mutableStateOf("") }
     var secondName by remember { mutableStateOf("") }
-    var gender by remember { mutableStateOf("") }
+    var gender by remember { mutableStateOf("Male") }
     var birthDate by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -46,7 +66,7 @@ fun SignUpScreen(navController: NavController) {
                 .padding(vertical = 10.dp)
         ) {
             IconButton(
-                onClick = { navController.navigate("LoginScreen") },
+                onClick = { navController.navigate(Routes.Login) },
                 modifier = Modifier.background(Color.Transparent)
             ) {
                 Icon(
@@ -73,85 +93,76 @@ fun SignUpScreen(navController: NavController) {
             )
             Spacer(modifier = Modifier.height(30.dp))
 
-            Column(modifier = Modifier.width(300.dp)) {
-                TextField(
-                    value = firstName,
-                    placeholder = { Text("First name") },
-                    onValueChange = { firstName = it },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.White,
-                        focusedIndicatorColor = Color.Gray,
-                        unfocusedIndicatorColor = Color.Gray
-                    )
-                )
-                TextField(
-                    value = secondName,
-                    placeholder = { Text("Second name") },
-                    onValueChange = { secondName = it },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.White,
-                        focusedIndicatorColor = Color.Gray,
-                        unfocusedIndicatorColor = Color.Gray
-                    )
-                )
+            Column(modifier = Modifier.padding(horizontal = 30.dp)) {
+                LoginTextField(value = firstName, label = "First name", isFirstNameError) { firstName = it }
+
+                LoginTextField(value = secondName, label = "Second name", isSecondNameError) { secondName = it }
+
                 GenderDropMenu(onValueChange = { gender = it })
-                BirthDateField(birthDate = birthDate, onBirthDateChange = { birthDate = it }, navController)
-                TextField(
-                    value = email,
-                    placeholder = { Text("Email") },
-                    onValueChange = { email = it },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.White,
-                        focusedIndicatorColor = Color.Gray,
-                        unfocusedIndicatorColor = Color.Gray
+
+                BirthDateField(birthDate = birthDate, isBirthDateError, onBirthDateChange = { birthDate = it }, navController)
+
+                LoginTextField(value = location, label = "Location", isLocationError) { location = it }
+
+                LoginTextField(value = email, label = "Email", isEmailError) { email = it }
+
+                PasswordField(password = password, isPasswordError, onPasswordChange = { password = it })
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                if (errorState.isNotEmpty()) {
+                    Text(
+                        text = errorState,
+                        fontFamily = poppinsFontFamily,
+                        fontSize = 14.sp,
+                        color = Color.Red,
+                        textAlign = TextAlign.Center
                     )
-                )
-                PasswordField(password = password, onPasswordChange = { password = it })
+                }
 
                 Spacer(modifier = Modifier.height(50.dp))
 
                 Button(
-                    onClick = { signUp(auth, email, password) },
+                    onClick = {
+                        isFirstNameError = firstName.isBlank()
+                        isSecondNameError = secondName.isBlank()
+                        isBirthDateError = birthDate.isBlank()
+                        isLocationError = location.isBlank()
+                        isEmailError = email.isBlank()
+                        isPasswordError = password.isBlank() || (password.length < 6)
+
+                        val isError: Boolean = (isFirstNameError || isSecondNameError || isBirthDateError || isLocationError || isEmailError || isPasswordError)
+
+                        if (!isError) {
+                            signUp(
+                                viewModel,
+                                auth,
+                                email,
+                                password,
+                                firstName,
+                                secondName,
+                                gender,
+                                birthDate,
+                                location,
+                                onSignUpSuccess = {
+                                    navController.navigate(Routes.Profile)
+                                },
+                                onSignUpFailure = { error ->
+                                    errorState = error
+                                }
+                            )
+                        } else {
+                            errorState = "Please fill all required fields!"
+                        }
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAA3FEC)),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp)
+                        .height(65.dp)
                         .padding(bottom = 10.dp)
                 ) {
                     Text(
                         text = "SIGN UP",
-                        fontFamily = poppinsFontFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 16.sp,
-                        color = Color.White
-                    )
-                }
-                Button(
-                    onClick = { signIn(auth, email, password) },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAA3FEC)),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .padding(bottom = 10.dp)
-                ) {
-                    Text(
-                        text = "SIGN IN",
-                        fontFamily = poppinsFontFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 16.sp,
-                        color = Color.White
-                    )
-                }
-                Button(
-                    onClick = { signOut(auth) },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAA3FEC)),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .padding(bottom = 10.dp)
-                ) {
-                    Text(
-                        text = "SIGN OUT",
                         fontFamily = poppinsFontFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 16.sp,
@@ -177,6 +188,7 @@ fun GenderDropMenu(onValueChange: (String) -> Unit) {
     ) {
         TextField(
             modifier = Modifier
+                .fillMaxWidth()
                 .menuAnchor(),
             placeholder = { Text(text = "Gender") },
             colors = TextFieldDefaults.textFieldColors(
@@ -214,7 +226,13 @@ fun GenderDropMenu(onValueChange: (String) -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BirthDateField(birthDate: String, onBirthDateChange: (String) -> Unit, navController: NavController) {
+fun BirthDateField(
+        birthDate: String,
+        isError: Boolean = false,
+        onBirthDateChange: (String) -> Unit,
+        navController: NavController
+) {
+
     val dateFormatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
     val calendar = remember { Calendar.getInstance() }
     var selectedDate by remember { mutableStateOf(Calendar.getInstance().apply { set(1990, Calendar.JANUARY, 1)}.time) }
@@ -232,7 +250,6 @@ fun BirthDateField(birthDate: String, onBirthDateChange: (String) -> Unit, navCo
     TextField(
         value = birthDate,
         onValueChange = onBirthDateChange,
-        placeholder = { Text("Date of Birth") },
         trailingIcon = {
             IconButton(onClick = { datePickerDialog.show() }) {
                 Icon(imageVector = Icons.Default.ArrowDropDown , contentDescription = "Calendar")
@@ -241,55 +258,151 @@ fun BirthDateField(birthDate: String, onBirthDateChange: (String) -> Unit, navCo
         colors = TextFieldDefaults.textFieldColors(
             containerColor = Color.White,
             focusedIndicatorColor = Color.Gray,
-            unfocusedIndicatorColor = Color.Gray
+            unfocusedIndicatorColor = if (isError) Color.Red else Color.Gray,
+            focusedPlaceholderColor = Color.Gray,
+            unfocusedPlaceholderColor = if (isError) Color.Red else Color.Gray,
         ),
+        placeholder = { Text("Date of Birth") },
         readOnly = true,
         modifier = Modifier
+            .fillMaxWidth()
             .padding(vertical = 8.dp)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginTextField(
+    value: String,
+    label: String,
+    isError: Boolean = false,
+    onValueChange: (String) -> Unit
+) {
+    val focusRequester = remember { FocusRequester() }
+    var isFocused by remember { mutableStateOf(false) }
+
+    TextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester)
+            .onFocusChanged { focusState ->
+                isFocused = focusState.isFocused
+            },
+        value = value,
+        label = {
+            Text(
+                text = label,
+                color = when {
+                    isFocused -> Color.Gray
+                    isError -> Color.Red
+                    else -> Color.Gray
+                }
+            )
+        },
+        onValueChange = onValueChange,
+        colors = TextFieldDefaults.textFieldColors(
+            containerColor = Color.White,
+            focusedIndicatorColor = Color.Gray,
+            unfocusedIndicatorColor = if (isError) Color.Red else Color.Gray
+        ),
+        singleLine = true
     )
 }
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordField(password: String, onPasswordChange: (String) -> Unit) {
+fun PasswordField(password: String, isError: Boolean = false, onPasswordChange: (String) -> Unit) {
+    val focusRequester = remember { FocusRequester() }
+    var isFocused by remember { mutableStateOf(false) }
+
     TextField(
         value = password,
         onValueChange = onPasswordChange,
-        placeholder = { Text("Password") },
+        label = {
+            Text(
+                text = "Password",
+                color = when {
+                    isFocused -> Color.Gray
+                    isError -> Color.Red
+                    else -> Color.Gray
+                }
+            )
+        },
         visualTransformation = PasswordVisualTransformation(),
         colors = TextFieldDefaults.textFieldColors(
             containerColor = Color.White,
             focusedIndicatorColor = Color.Gray,
-            unfocusedIndicatorColor = Color.Gray
+            unfocusedIndicatorColor = if (isError) Color.Red else Color.Gray
         ),
         modifier = Modifier
+            .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .focusRequester(focusRequester)
+            .onFocusChanged { focusState ->
+                isFocused = focusState.isFocused
+            },
     )
 }
 
-private fun signUp(auth: FirebaseAuth, email: String, password: String) {
+private fun signUp(
+    profileViewModel: ProfileViewModel,
+    auth: FirebaseAuth,
+    email: String,
+    password: String,
+    firstName: String,
+    secondName: String,
+    gender: String,
+    birthDate: String,
+    location: String,
+    onSignUpSuccess: () -> Unit,
+    onSignUpFailure: (String) -> Unit
+) {
+    if (email.isBlank() || password.isBlank()) {
+        onSignUpFailure("Email and password cannot be empty!")
+        return
+    }
+
+    val dateFormatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    val birthDateAsDate: Date = try {
+        dateFormatter.parse(birthDate)!!
+    } catch (e: Exception) {
+        onSignUpFailure("Invalid birth date format!")
+        return
+    }
+
     auth.createUserWithEmailAndPassword(email, password)
-        .addOnCompleteListener {
-            if (it.isSuccessful) {
-                Log.d("Mylog", "SignUp is successful!")
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val uid = task.result?.user?.uid ?: return@addOnCompleteListener
+                val userEntity = UserEntity(
+                    uid = uid,
+                    firstName = firstName,
+                    secondName = secondName,
+                    emailAddress = email,
+                    password = password,
+                    location = location,
+                    birthDate = birthDateAsDate,
+                    gender = gender
+                )
+                profileViewModel.saveUserToFirestore(
+                    uid,
+                    userEntity,
+                    onSuccess = {
+                        onSignUpSuccess()
+                    },
+                    onFailure = { error ->
+                        onSignUpFailure(error)
+                    }
+                )
             } else {
-                Log.d("MyLog", "SignUp is failed!")
+                onSignUpFailure(task.exception?.message ?: "Sign Up Error!")
             }
+        }
+        .addOnFailureListener { error ->
+            onSignUpFailure(error.message ?: "Sign Up Error!")
         }
 }
 
-private fun signIn(auth: FirebaseAuth, email: String, password: String) {
-    auth.signInWithEmailAndPassword(email, password)
-        .addOnCompleteListener {
-            if (it.isSuccessful) {
-                Log.d("Mylog", "SignIn is successful!")
-            } else {
-                Log.d("MyLog", "SignIn is failed!")
-            }
-        }
-}
 
-private fun signOut(auth: FirebaseAuth) {
-    auth.signOut()
-}
+
