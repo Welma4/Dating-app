@@ -150,7 +150,7 @@ fun EditProfileScreen(
             fieldName = "Location"
         )
 
-        GenderMenu(onValueChange = {gender = it})
+        GenderMenu(onValueChange = { gender = it })
 
         Spacer(modifier = Modifier.height(32.dp))
 

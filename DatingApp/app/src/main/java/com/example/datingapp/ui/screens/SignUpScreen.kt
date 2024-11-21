@@ -1,3 +1,9 @@
+import android.content.ContentResolver
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.util.Base64
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,21 +18,22 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.datingapp.R
 import com.example.datingapp.data.Routes
 import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.theme.poppinsFontFamily
+import com.example.datingapp.viewmodel.PhotoViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -34,7 +41,8 @@ import java.util.*
 @Composable
 fun SignUpScreen(
     navController: NavController,
-    viewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
+    photoViewModel: PhotoViewModel
 ) {
 
     val auth = Firebase.auth
@@ -55,6 +63,7 @@ fun SignUpScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)
@@ -135,7 +144,8 @@ fun SignUpScreen(
 
                         if (!isError) {
                             signUp(
-                                viewModel,
+                                profileViewModel,
+                                photoViewModel,
                                 auth,
                                 email,
                                 password,
@@ -144,6 +154,7 @@ fun SignUpScreen(
                                 gender,
                                 birthDate,
                                 location,
+                                context,
                                 onSignUpSuccess = {
                                     navController.navigate(Routes.Profile)
                                 },
@@ -347,6 +358,7 @@ fun PasswordField(password: String, isError: Boolean = false, onPasswordChange: 
 
 private fun signUp(
     profileViewModel: ProfileViewModel,
+    photoViewModel: PhotoViewModel,
     auth: FirebaseAuth,
     email: String,
     password: String,
@@ -355,6 +367,7 @@ private fun signUp(
     gender: String,
     birthDate: String,
     location: String,
+    context: Context,
     onSignUpSuccess: () -> Unit,
     onSignUpFailure: (String) -> Unit
 ) {
@@ -389,12 +402,28 @@ private fun signUp(
                     uid,
                     userEntity,
                     onSuccess = {
-                        onSignUpSuccess()
+                        val defaultImage = BitmapFactory.decodeResource(
+                            context.resources,
+                            R.drawable.default_icon
+                        )
+                        val photoBase64 = bitmapToBase64(defaultImage)
+                        photoViewModel.savePhotoToFirestore(
+                            idUser = uid,
+                            photoBase64 = photoBase64,
+                            onSuccess = {
+                                onSignUpSuccess()
+                            },
+                            onFailure = { error ->
+                                onSignUpFailure("User created, but photo error: $error")
+                            }
+                        )
                     },
                     onFailure = { error ->
                         onSignUpFailure(error)
                     }
                 )
+
+
             } else {
                 onSignUpFailure(task.exception?.message ?: "Sign Up Error!")
             }
@@ -404,5 +433,20 @@ private fun signUp(
         }
 }
 
+private fun imageToBase64(uri: Uri, contentResolver: ContentResolver): String {
+    val inputStream = contentResolver.openInputStream(uri)
 
+    val bytes = inputStream?.readBytes()
+    return bytes?.let {
+        Base64.encodeToString(it, Base64.DEFAULT)
+    } ?: ""
+}
 
+fun bitmapToBase64(bitmap: Bitmap): String {
+    val outputStream = ByteArrayOutputStream()
+    // Сжатие изображения в формате PNG. Можно изменить на JPEG, если нужно.
+    bitmap.compress(Bitmap.CompressFormat.PNG, 10, outputStream)
+    val byteArray = outputStream.toByteArray()
+    // Преобразование байтов в строку Base64
+    return Base64.encodeToString(byteArray, Base64.DEFAULT)
+}

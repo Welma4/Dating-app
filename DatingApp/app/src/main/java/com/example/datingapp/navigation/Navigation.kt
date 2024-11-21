@@ -29,7 +29,7 @@ fun DatingApp() {
 //    NavHost(navController, startDestination = Routes.Login) {
 
         composable(Routes.SignUp) {
-            SignUpScreen(navController, profileViewModel)
+            SignUpScreen(navController, profileViewModel, photoViewModel)
         }
 
         composable(Routes.SignIn) {

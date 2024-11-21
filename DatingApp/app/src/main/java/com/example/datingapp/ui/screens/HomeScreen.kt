@@ -10,10 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.example.datingapp.ui.components.NavigationMenu
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,7 +46,7 @@ fun VerticalSwipeFeed(items: List<String>) {
 
     Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -59,7 +62,12 @@ fun VerticalSwipeFeed(items: List<String>) {
         VerticalPager(
             count = Int.MAX_VALUE,
             state = pagerState,
-            modifier = Modifier.height(700.dp),
+            modifier = Modifier
+                .fillMaxHeight(0.9f)
+                .shadow(
+                    elevation = 16.dp,
+                    shape = RoundedCornerShape(30.dp),
+                ),
             itemSpacing = 30.dp
         ) { virtualPage ->
             val actualPage = virtualPage % itemCount
