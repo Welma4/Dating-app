@@ -55,6 +55,7 @@ fun VerticalSwipeFeed(items: List<String>) {
             painter = painterResource(id = R.drawable.home_app_logo),
             contentDescription = "home_app_logo",
             modifier = Modifier
+
                 .padding(vertical = 40.dp)
                 .fillMaxWidth(0.4f)
                 .height(36.dp)

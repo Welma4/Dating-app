@@ -16,13 +16,13 @@ sealed class BottomMenuItem(
     )
     object Likes : BottomMenuItem(
         title = "likes",
-        route = "",
+        route = Routes.Likes,
         iconId = R.drawable.ic_likes,
         selectedIconId = R.drawable.ic_selected_likes
     )
     object Messages : BottomMenuItem(
         title = "messages",
-        route = "",
+        route = Routes.Messages,
         iconId = R.drawable.ic_messages,
         selectedIconId = R.drawable.ic_selected_messages
     )
