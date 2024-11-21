@@ -14,6 +14,7 @@ import com.example.datingapp.ui.screens.HomeScreen
 import com.example.datingapp.ui.screens.LoginScreen
 import com.example.datingapp.ui.screens.ProfileScreen
 import com.example.datingapp.ui.screens.SignInScreen
+import com.example.datingapp.viewmodel.PhotoViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -21,6 +22,7 @@ import com.google.firebase.auth.auth
 fun DatingApp() {
     val navController = rememberNavController()
     val profileViewModel: ProfileViewModel = viewModel()
+    val photoViewModel: PhotoViewModel = viewModel()
     val auth = Firebase.auth
 
     NavHost(navController, startDestination = if (auth.currentUser != null) Routes.Profile else Routes.Login) {
@@ -45,7 +47,8 @@ fun DatingApp() {
         composable(Routes.Profile) {
             ProfileScreen(
                 navController,
-                profileViewModel
+                profileViewModel,
+                photoViewModel
             )
         }
         composable(Routes.EditProfile) {

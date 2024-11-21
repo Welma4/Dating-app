@@ -2,6 +2,9 @@ package com.example.datingapp.ui.screens
 
 import ProfileViewModel
 import android.app.DatePickerDialog
+import android.content.ContentResolver
+import android.net.Uri
+import android.util.Base64
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -39,6 +42,7 @@ import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.components.EditableTextField
 import com.example.datingapp.ui.components.GenderMenu
 import com.example.datingapp.ui.theme.poppinsFontFamily
+import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -109,6 +113,12 @@ fun EditProfileScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        Text(
+            text = "Account Settings",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+        )
+
         EditableTextField(
             fieldValue = firstName,
             onValueChange = { firstName = it },
@@ -174,5 +184,4 @@ fun EditProfileScreen(
         }
     }
 }
-
 

@@ -28,7 +28,7 @@ import com.google.firebase.auth.auth
 @Composable
 fun SignInScreen(navController: NavController) {
     val auth = Firebase.auth
-    Log.d("MyLog", "User email: ${auth.currentUser?.email}")
+//    Log.d("MyLog", "User email: ${auth.currentUser?.email}")
 
     var errorState by remember { mutableStateOf("") }
     var isEmailError by remember { mutableStateOf(false) }

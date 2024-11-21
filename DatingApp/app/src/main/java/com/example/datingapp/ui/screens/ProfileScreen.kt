@@ -2,6 +2,14 @@ package com.example.datingapp.ui.screens
 
 import ProfileViewModel
 import android.annotation.SuppressLint
+import android.content.ContentResolver
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.util.Base64
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,21 +27,28 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -47,26 +62,83 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
+import coil.compose.rememberAsyncImagePainter
+import com.example.datingapp.viewmodel.PhotoViewModel
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ProfileScreen(
     navController: NavController,
-    viewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
+    photoViewModel: PhotoViewModel
 ) {
+
+    val cr = LocalContext.current.contentResolver
 
     val auth = Firebase.auth
     val currentUser = FirebaseAuth.getInstance().currentUser
+
+    var bitmapImage by remember { mutableStateOf<Bitmap?>(null) }
+    val defaultImage = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.default_user_photo)
+
     LaunchedEffect(currentUser) {
         currentUser?.let { user ->
-            viewModel.loadUser(user.uid)
+            profileViewModel.loadUser(user.uid)
+            photoViewModel.getPhotoBitmap(
+                user.uid,
+                onSuccess = {
+                    bitmapImage = it
+                },
+                onFailure = {
+                    Log.d("MyLog", "Error fetching photo")
+                    bitmapImage = defaultImage
+                }
+            )
         }
     }
-    val user = viewModel.user.value
 
-    val age = calculateAge(viewModel.user.value.birthDate!!)
+    val user = profileViewModel.user.value
+
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var isImageLoaded by remember { mutableStateOf(false) }
+    val imageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        selectedImageUri = uri
+        isImageLoaded = (uri != null)
+    }
+
+    LaunchedEffect(isImageLoaded) {
+        if (isImageLoaded) {
+            photoViewModel.savePhotoToFirestore(
+                currentUser!!.uid,
+                imageToBase64(
+                    selectedImageUri!!,
+                    cr
+                ),
+                onSuccess = {
+                    Log.d("MyLog", "Image uploaded successfully")
+                    photoViewModel.getPhotoBitmap(
+                        user.uid,
+                        onSuccess = {
+                            bitmapImage = it
+                        },
+                        onFailure = {
+                            Log.d("MyLog", "Error fetching photo")
+                        }
+                    )
+                },
+                onFailure = {
+                    Log.d("MyLog", "Image uploading error!")
+                }
+            )
+        }
+    }
+
+    val age = calculateAge(profileViewModel.user.value.birthDate!!)
     val dateFormatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-    val formattedDate = dateFormatter.format(viewModel.user.value.birthDate!!)
+    val formattedDate = dateFormatter.format(profileViewModel.user.value.birthDate!!)
 
     val gradientColors = listOf(
         Color(0xFFA020F0),
@@ -87,30 +159,58 @@ fun ProfileScreen(
                 contentAlignment = Alignment.TopCenter
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Spacer(modifier = Modifier.height(60.dp))
+                    Spacer(modifier = Modifier.height(30.dp))
+
+                    Text(
+                        text = "Profile",
+                        textAlign = TextAlign.Center,
+                        fontSize = 22.sp,
+                        color = Color.White
+                    )
+
+                    Spacer(modifier = Modifier.height(15.dp))
+
                     Box(
                         modifier = Modifier
-                            .size(100.dp)
+                            .size(120.dp)
                             .background(Color.White, CircleShape)
                     ) {
 
                         Image(
-                            painter = painterResource(id = R.drawable.osel2),
+                            painter = rememberAsyncImagePainter(
+                                model = bitmapImage
+                            ),
                             contentDescription = "Profile Picture",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(CircleShape)
                         )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            IconButton(
+                                onClick = { imageLauncher.launch("image/*") },
+                                modifier = Modifier
+                                    .size(34.dp)
+                            ) {
+                                Image(
+                                    modifier = Modifier.size(34.dp),
+                                    painter = painterResource(id = R.drawable.ic_edit),
+                                    contentDescription = "edit"
+                                )
+                            }
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
                         text = "${user.firstName}, ${age}",
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
                         color = Color.White,
-                        fontFamily = poppinsFontFamily
                     )
                 }
             }
@@ -132,14 +232,12 @@ fun ProfileScreen(
                         text = "Account Settings",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = poppinsFontFamily
                     )
                     Text(
                         text = "Edit",
                         fontSize = 14.sp,
                         color = Color.Blue,
                         modifier = Modifier.clickable { navController.navigate(Routes.EditProfile) },
-                        fontFamily = poppinsFontFamily
                     )
                 }
 
@@ -211,6 +309,15 @@ fun ProfileField(label: String, value: String) {
 
 private fun signOut(auth: FirebaseAuth) {
     auth.signOut()
+}
+
+private fun imageToBase64(uri: Uri, contentResolver: ContentResolver): String {
+    val inputStream = contentResolver.openInputStream(uri)
+
+    val bytes = inputStream?.readBytes()
+    return bytes?.let {
+        Base64.encodeToString(it, Base64.DEFAULT)
+    } ?: ""
 }
 
 
