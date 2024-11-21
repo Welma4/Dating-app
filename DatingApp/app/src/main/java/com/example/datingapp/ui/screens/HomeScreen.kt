@@ -59,6 +59,7 @@ fun VerticalSwipeFeed(items: List<String>) {
                 .height(36.dp)
         )
 
+
         VerticalPager(
             count = Int.MAX_VALUE,
             state = pagerState,
