@@ -50,6 +50,7 @@ fun VerticalSwipeFeed(items: List<String>) {
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Image(
             painter = painterResource(id = R.drawable.home_app_logo),
             contentDescription = "home_app_logo",
