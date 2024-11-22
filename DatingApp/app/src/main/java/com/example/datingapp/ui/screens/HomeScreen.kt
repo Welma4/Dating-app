@@ -84,6 +84,8 @@ fun HomeScreen(
 }
 
 val B: Int = 1
+val D: Int = 1
+
 
 @Composable
 fun VerticalSwipeFeed(
