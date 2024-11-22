@@ -89,7 +89,7 @@ fun LoginScreen(
                     .height(50.dp)
                     .clickable { },
                 colors = ButtonDefaults.buttonColors(Color.White),
-                onClick = { navController.navigate(Routes.Profile) },
+                onClick = {  },
                 border = BorderStroke(2.dp, Color(0xFFEBEAEC))
             ) {
                 Row(

@@ -63,4 +63,23 @@ class ProfileViewModel : ViewModel() {
         )
     }
 
+    fun fetchUsersExceptCurrent(
+        currentUserUid: String,
+        onSuccess: (List<UserEntity>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("user")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val users = querySnapshot.documents.mapNotNull { document ->
+                    document.toObject(UserEntity::class.java)
+                }.filter { it.uid != currentUserUid }
+                onSuccess(users)
+            }
+            .addOnFailureListener { e ->
+                onFailure(e.message ?: "Error fetching users")
+            }
+    }
+
 }

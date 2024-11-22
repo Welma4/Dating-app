@@ -43,7 +43,11 @@ fun DatingApp() {
         }
 
         composable(Routes.Home) {
-            HomeScreen(navController)
+            HomeScreen(
+                navController,
+                profileViewModel,
+                photoViewModel
+            )
         }
 
         composable(Routes.Profile) {
