@@ -83,6 +83,9 @@ fun HomeScreen(
     }
 }
 
+val A: Int = 1;
+val B: Int = 1;
+
 @Composable
 fun VerticalSwipeFeed(
     items: List<UserEntity>,
