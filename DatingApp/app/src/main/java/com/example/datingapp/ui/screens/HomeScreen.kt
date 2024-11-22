@@ -38,6 +38,7 @@ import com.example.datingapp.viewmodel.PhotoViewModel
 import com.google.accompanist.pager.*
 import com.google.firebase.auth.FirebaseAuth
 
+val TEST: String = ""
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
