@@ -107,6 +107,8 @@ fun VerticalSwipeFeed(
         }
     }
 
+    val a: Int = 1;
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -186,4 +188,5 @@ fun VerticalSwipeFeed(
         }
     }
 }
+
 
