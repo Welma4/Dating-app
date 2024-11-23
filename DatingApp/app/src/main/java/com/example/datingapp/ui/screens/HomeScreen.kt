@@ -5,6 +5,9 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -13,26 +16,29 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.example.datingapp.ui.components.NavigationMenu
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.datingapp.R
 import com.example.datingapp.data.UserEntity
+import com.example.datingapp.ui.theme.MediumPink
 import com.example.datingapp.ui.utils.calculateAge
 import com.example.datingapp.viewmodel.PhotoViewModel
 import com.google.accompanist.pager.*
@@ -48,6 +54,8 @@ fun HomeScreen(
 ) {
 
     val usersList = remember { mutableStateOf<List<UserEntity>>(emptyList()) }
+    val isFilterMenuVisible = remember { mutableStateOf(false) }
+
 
     LaunchedEffect(Unit) {
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
@@ -62,6 +70,7 @@ fun HomeScreen(
         )
     }
 
+    Box(modifier = Modifier.fillMaxSize())
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = { NavigationMenu(navController) }
@@ -69,7 +78,8 @@ fun HomeScreen(
         if (usersList.value.isNotEmpty()) {
             VerticalSwipeFeed(
                 items = usersList.value.map { it },
-                photoViewModel
+                photoViewModel,
+                isFilterMenuVisible
             )
         } else {
             Column(
@@ -80,6 +90,7 @@ fun HomeScreen(
                 Text(text = "Loading users...", fontSize = 40.sp)
             }
         }
+        FiltresDialog(isFilterMenuVisible.value) { isFilterMenuVisible.value = it }
     }
 }
 
@@ -87,11 +98,13 @@ fun HomeScreen(
 @Composable
 fun VerticalSwipeFeed(
     items: List<UserEntity>,
-    photoViewModel: PhotoViewModel
+    photoViewModel: PhotoViewModel,
+    isFilterMenuVisible: MutableState<Boolean>
 ) {
     val pagerState = rememberPagerState()
     val itemCount = items.size
     val photoBitmaps = remember { mutableStateOf<Map<String, Bitmap>>(emptyMap()) }
+
 
     LaunchedEffect(items) {
         items.forEach { user ->
@@ -107,8 +120,6 @@ fun VerticalSwipeFeed(
         }
     }
 
-    val a: Int = 1;
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -116,16 +127,34 @@ fun VerticalSwipeFeed(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Image(
-            painter = painterResource(id = R.drawable.home_app_logo),
-            contentDescription = "home_app_logo",
-            modifier = Modifier
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Spacer(modifier = Modifier.weight(0.3f))
 
-                .padding(vertical = 40.dp)
-                .fillMaxWidth(0.4f)
-                .height(36.dp)
-        )
+            Image(
+                painter = painterResource(id = R.drawable.home_app_logo),
+                contentDescription = "home_app_logo",
+                modifier = Modifier
+                    .padding(vertical = 40.dp)
+                    .weight(2f)
+                    .height(36.dp)
+            )
+            IconButton(
+                modifier = Modifier
+                    .size(30.dp),
+                onClick = { isFilterMenuVisible.value = true }
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .size(30.dp),
+                    painter = painterResource(id = R.drawable.ic_filter),
+                    contentDescription = "filter"
+                )
 
+            }
+        }
 
         VerticalPager(
             count = Int.MAX_VALUE,
@@ -133,7 +162,7 @@ fun VerticalSwipeFeed(
             modifier = Modifier
                 .fillMaxHeight(0.9f)
                 .shadow(
-                    elevation = 16.dp,
+                    elevation = 8.dp,
                     shape = RoundedCornerShape(30.dp),
                 ),
             itemSpacing = 30.dp,
@@ -167,8 +196,8 @@ fun VerticalSwipeFeed(
                 }
                 Column(
                     modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(horizontal = 16.dp, vertical = 15.dp)
+                        .align(Alignment.BottomStart)
+                        .padding(horizontal = 16.dp, vertical = 15.dp)
                 ) {
                     Text(
                         text = "${items[actualPage].firstName}  ${items[actualPage].secondName}, ${calculateAge(items[actualPage].birthDate!!)}",
@@ -189,4 +218,109 @@ fun VerticalSwipeFeed(
     }
 }
 
+@Composable()
+fun FiltresDialog(isDialog: Boolean, onDialogChange: (Boolean) -> Unit) {
+    var selectedGender = remember { mutableStateOf("Male") }
+    if (isDialog) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.6f))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.4f)
+                    .background(Color.White, shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 20.dp)
+                    ) {
+                        IconButton(
+                            modifier = Modifier.size(24.dp),
+                            onClick = { onDialogChange(false) }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "close",
+                                modifier = Modifier
+                                    .size(24.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.weight(0.8f))
+                        Text(
+                            text = "Filter",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Normal,
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp),
+                    ) {
+                        Text(
+                            text = "Gender",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.Black,
+                            textAlign = TextAlign.Left
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        GenderPreferenceMenu(selectedGender = selectedGender.value, onGenderSelected = { selectedGender.value = it })
+                    }
+                }
+            }
+        }
+    }
+}
 
+@Composable
+fun GenderPreferenceMenu(selectedGender: String, onGenderSelected: (String) -> Unit) {
+    Row(
+        modifier = Modifier
+            .border(1.dp, Color.Gray, RoundedCornerShape(40))
+            .clip(RoundedCornerShape(40))
+            .fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .background(if (selectedGender == "Male") MediumPink else Color.Transparent)
+                .clickable(onClick = { onGenderSelected("Male") })
+                .padding(vertical = 10.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Male",
+                color = if (selectedGender == "Male") Color.White else Color.Gray,
+            )
+        }
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .background(if (selectedGender == "Female") MediumPink else Color.Transparent)
+                .clickable(onClick = { onGenderSelected("Female") })
+                .padding(vertical = 10.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Female",
+                color = if (selectedGender == "Female") Color.White else Color.Gray,
+            )
+        }
+    }
+}
