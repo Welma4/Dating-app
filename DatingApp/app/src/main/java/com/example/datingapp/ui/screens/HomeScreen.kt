@@ -1,5 +1,6 @@
 package com.example.datingapp.ui.screens
 
+import AgeRangeSelector
 import ProfileViewModel
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
@@ -21,10 +22,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Slider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -38,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.datingapp.R
 import com.example.datingapp.data.UserEntity
+import com.example.datingapp.ui.components.GenderPreferenceMenu
 import com.example.datingapp.ui.theme.MediumPink
 import com.example.datingapp.ui.utils.calculateAge
 import com.example.datingapp.viewmodel.PhotoViewModel
@@ -55,7 +60,6 @@ fun HomeScreen(
 
     val usersList = remember { mutableStateOf<List<UserEntity>>(emptyList()) }
     val isFilterMenuVisible = remember { mutableStateOf(false) }
-
 
     LaunchedEffect(Unit) {
         val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
@@ -131,7 +135,7 @@ fun VerticalSwipeFeed(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Spacer(modifier = Modifier.weight(0.3f))
+            Spacer(modifier = Modifier.weight(0.25f))
 
             Image(
                 painter = painterResource(id = R.drawable.home_app_logo),
@@ -152,7 +156,6 @@ fun VerticalSwipeFeed(
                     painter = painterResource(id = R.drawable.ic_filter),
                     contentDescription = "filter"
                 )
-
             }
         }
 
@@ -221,6 +224,8 @@ fun VerticalSwipeFeed(
 @Composable()
 fun FiltresDialog(isDialog: Boolean, onDialogChange: (Boolean) -> Unit) {
     var selectedGender = remember { mutableStateOf("Male") }
+    var ageRange by remember { mutableStateOf(0 to 100) }
+
     if (isDialog) {
         Box(
             modifier = Modifier
@@ -230,7 +235,7 @@ fun FiltresDialog(isDialog: Boolean, onDialogChange: (Boolean) -> Unit) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.4f)
+                    .fillMaxHeight(0.35f)
                     .background(Color.White, shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
             ) {
                 Column(
@@ -242,7 +247,7 @@ fun FiltresDialog(isDialog: Boolean, onDialogChange: (Boolean) -> Unit) {
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 20.dp)
+                            .padding(top = 35.dp, bottom = 25.dp)
                     ) {
                         IconButton(
                             modifier = Modifier.size(24.dp),
@@ -258,12 +263,24 @@ fun FiltresDialog(isDialog: Boolean, onDialogChange: (Boolean) -> Unit) {
                         Spacer(modifier = Modifier.weight(0.8f))
                         Text(
                             text = "Filter",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Normal,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
                             modifier = Modifier.weight(1f),
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.weight(1f))
+                        IconButton(
+                            modifier = Modifier.size(24.dp),
+                            onClick = { onDialogChange(false) }
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_save_filters),
+                                tint = MediumPink,
+                                contentDescription = "save",
+                                modifier = Modifier
+                                    .size(24.dp)
+                            )
+                        }
                     }
                     Column(
                         modifier = Modifier
@@ -273,12 +290,24 @@ fun FiltresDialog(isDialog: Boolean, onDialogChange: (Boolean) -> Unit) {
                         Text(
                             text = "Gender",
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Normal,
+                            fontWeight = FontWeight.Bold,
                             color = Color.Black,
                             textAlign = TextAlign.Left
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         GenderPreferenceMenu(selectedGender = selectedGender.value, onGenderSelected = { selectedGender.value = it })
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Age",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            textAlign = TextAlign.Left
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        AgeRangeSelector() { startAge, endAge ->
+                            ageRange = startAge to endAge
+                        }
                     }
                 }
             }
@@ -286,41 +315,4 @@ fun FiltresDialog(isDialog: Boolean, onDialogChange: (Boolean) -> Unit) {
     }
 }
 
-@Composable
-fun GenderPreferenceMenu(selectedGender: String, onGenderSelected: (String) -> Unit) {
-    Row(
-        modifier = Modifier
-            .border(1.dp, Color.Gray, RoundedCornerShape(40))
-            .clip(RoundedCornerShape(40))
-            .fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .background(if (selectedGender == "Male") MediumPink else Color.Transparent)
-                .clickable(onClick = { onGenderSelected("Male") })
-                .padding(vertical = 10.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Male",
-                color = if (selectedGender == "Male") Color.White else Color.Gray,
-            )
-        }
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .background(if (selectedGender == "Female") MediumPink else Color.Transparent)
-                .clickable(onClick = { onGenderSelected("Female") })
-                .padding(vertical = 10.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Female",
-                color = if (selectedGender == "Female") Color.White else Color.Gray,
-            )
-        }
-    }
-}
+
