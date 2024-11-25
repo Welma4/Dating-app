@@ -27,7 +27,7 @@ fun DatingApp() {
     val photoViewModel: PhotoViewModel = viewModel()
     val auth = Firebase.auth
 
-    NavHost(navController, startDestination = if (auth.currentUser != null) Routes.Profile else Routes.Login) {
+    NavHost(navController, startDestination = if (auth.currentUser != null) Routes.Home else Routes.Login) {
 //    NavHost(navController, startDestination = Routes.Login) {
 
         composable(Routes.SignUp) {
