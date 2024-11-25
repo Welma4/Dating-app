@@ -50,12 +50,16 @@ fun NavigationMenu(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .height(70.dp)
             .clip(RoundedCornerShape(35.dp))
             .border(2.dp, Color(0xFFDCE1EF), RoundedCornerShape(35.dp))
             .background(Color.White)
-            .height(70.dp),
     ) {
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             items.forEach { item ->
                 val isSelected = currentRoute == item.route
                 NavigationBarItem(

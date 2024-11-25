@@ -23,16 +23,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.datingapp.R
 import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.components.FiltersDialog
+import com.example.datingapp.ui.theme.MediumGray
 import com.example.datingapp.ui.utils.calculateAge
 import com.example.datingapp.viewmodel.PhotoViewModel
 import com.google.accompanist.pager.*
@@ -65,7 +69,7 @@ fun HomeScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            bottomBar = { NavigationMenu(navController) }
+            bottomBar = { NavigationMenu(navController) },
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 HeaderSection(isFilterMenuVisible)
@@ -90,7 +94,7 @@ fun HeaderSection(isFilterMenuVisible: MutableState<Boolean>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 40.dp),
+            .padding(horizontal = 16.dp, vertical = 35.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = Modifier.weight(0.25f))
@@ -143,9 +147,8 @@ fun VerticalSwipeFeed(
         count = Int.MAX_VALUE,
         state = pagerState,
         modifier = Modifier
-            .fillMaxHeight(0.9f)
-            .padding(horizontal = 16.dp)
-            .shadow(elevation = 8.dp, shape = RoundedCornerShape(30.dp)),
+            .fillMaxHeight(0.92f)
+            .padding(horizontal = 16.dp),
         itemSpacing = 30.dp,
     ) { virtualPage ->
         val actualPage = virtualPage % itemCount
@@ -163,6 +166,7 @@ fun VerticalSwipeFeed(
                     contentDescription = "user_photo",
                     modifier = Modifier
                         .fillMaxSize()
+                        .shadow(elevation = 8.dp, shape = RoundedCornerShape(30.dp), spotColor = Color.Black, ambientColor = Color.Black)
                         .clip(RoundedCornerShape(30.dp)),
                     contentScale = ContentScale.Crop
                 )
@@ -172,6 +176,7 @@ fun VerticalSwipeFeed(
                     contentDescription = "default_photo",
                     modifier = Modifier
                         .fillMaxSize()
+                        .shadow(elevation = 8.dp, shape = RoundedCornerShape(30.dp), spotColor = Color.Black, ambientColor = Color.Black)
                         .clip(RoundedCornerShape(30.dp)),
                     contentScale = ContentScale.Crop
                 )
@@ -187,12 +192,14 @@ fun VerticalSwipeFeed(
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
+                    style = TextStyle(shadow = Shadow(MediumGray, Offset(5.0f, 2.0f), 1.0f))
                 )
                 Text(
                     text = items[actualPage].location,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
                     color = Color.White,
+                    style = TextStyle(shadow = Shadow(MediumGray, Offset(5.0f, 2.0f), 1.0f))
                 )
             }
         }
