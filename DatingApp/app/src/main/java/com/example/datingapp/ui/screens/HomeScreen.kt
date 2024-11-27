@@ -18,8 +18,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -38,7 +40,9 @@ import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.components.FiltersDialog
 import com.example.datingapp.ui.theme.MediumGray
 import com.example.datingapp.ui.utils.calculateAge
+import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
+import com.example.datingapp.viewmodel.PreferencesViewModel
 import com.google.accompanist.pager.*
 import com.google.firebase.auth.FirebaseAuth
 
@@ -48,23 +52,44 @@ import com.google.firebase.auth.FirebaseAuth
 fun HomeScreen(
     navController: NavController,
     profileViewModel: ProfileViewModel,
-    photoViewModel: PhotoViewModel
+    photoViewModel: PhotoViewModel,
+    preferencesViewModel: PreferencesViewModel,
+    genderViewModel: GenderViewModel,
+    currentUserId: String
 ) {
     val usersList = remember { mutableStateOf<List<UserEntity>>(emptyList()) }
     val isFilterMenuVisible = remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-        profileViewModel.fetchUsersExceptCurrent(
-            currentUserUid = currentUserUid,
-            onSuccess = { fetchedUsers ->
-                usersList.value = fetchedUsers
+    var genderIdPreference by remember { mutableStateOf("") }
+    var ageRangePreference by remember { mutableStateOf(0 to 100) }
+
+
+    LaunchedEffect(Unit, genderIdPreference, ageRangePreference) {
+        preferencesViewModel.fetchPreferencesForUser(
+            idUser = currentUserId,
+            onSuccess = { preferencesEntity ->
+                genderIdPreference = preferencesEntity.gender
+                ageRangePreference = preferencesEntity.startAgeRange to preferencesEntity.endAgeRange
+
+                profileViewModel.fetchFilteredUsers(
+                    currentUserUid = currentUserId,
+                    startAgeRange = ageRangePreference.first,
+                    endAgeRange = ageRangePreference.second,
+                    gender = genderIdPreference,
+                    onSuccess = { fetchedUsers ->
+                        usersList.value = fetchedUsers
+                    },
+                    onFailure = { error ->
+                        Log.e("HomeScreen", "Error loading users: $error")
+                    }
+                )
             },
             onFailure = { error ->
-                Log.e("HomeScreen", "Error loading users: $error")
+                Log.e("HomeScreen", "Error loading preferences: $error")
             }
         )
     }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -85,7 +110,22 @@ fun HomeScreen(
             }
         }
 
-        FiltersDialog(isFilterMenuVisible.value) { isFilterMenuVisible.value = it }
+        FiltersDialog(
+            preferencesViewModel = preferencesViewModel,
+            genderViewModel = genderViewModel,
+            currentUserId = currentUserId,
+            isDialog = isFilterMenuVisible.value,
+            onDialogChange = { isFilterMenuVisible.value = it },
+            onGenderChange = { newGenderId ->
+                genderIdPreference = newGenderId
+                Log.d("MyTag", "Updated Gender: $newGenderId")
+            },
+            onAgeRangeChange = { newAgeRange ->
+                ageRangePreference = newAgeRange
+                Log.d("MyTag", "Updated Age Range: ${newAgeRange.first}, ${newAgeRange.second}")
+            }
+        )
+
     }
 }
 

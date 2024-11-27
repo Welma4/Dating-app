@@ -2,6 +2,7 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.datingapp.data.UserEntity
+import com.example.datingapp.ui.utils.calculateAge
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -82,4 +83,34 @@ class ProfileViewModel : ViewModel() {
             }
     }
 
+    fun fetchFilteredUsers(
+        currentUserUid: String,
+        startAgeRange: Int,
+        endAgeRange: Int,
+        gender: String,
+        onSuccess: (List<UserEntity>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("user")
+            .get()
+            .addOnSuccessListener { result ->
+                val filteredUsers = result.documents.mapNotNull { document ->
+                    val user = document.toObject(UserEntity::class.java)
+                    user?.let {
+                        val age = it.birthDate?.let { birthDate -> calculateAge(birthDate) }
+//                        Log.d("MyTag", "1: ${gender},  2: ${it.gender}")
+                        if ((age in startAgeRange..endAgeRange) && (it.uid != currentUserUid) && (it.gender == gender)) {
+                            user
+                        } else {
+                            null
+                        }
+                    }
+                }
+                onSuccess(filteredUsers)
+            }
+            .addOnFailureListener { error ->
+                onFailure(error.message ?: "Failed to get filtered by gender users")
+            }
+    }
 }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import ProfileViewModel
 import SignUpScreen
 import android.util.Log
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,7 +17,9 @@ import com.example.datingapp.ui.screens.LoginScreen
 import com.example.datingapp.ui.screens.MessagesScreen
 import com.example.datingapp.ui.screens.ProfileScreen
 import com.example.datingapp.ui.screens.SignInScreen
+import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
+import com.example.datingapp.viewmodel.PreferencesViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -25,13 +28,22 @@ fun DatingApp() {
     val navController = rememberNavController()
     val profileViewModel: ProfileViewModel = viewModel()
     val photoViewModel: PhotoViewModel = viewModel()
+    val genderViewModel: GenderViewModel = viewModel()
+    LaunchedEffect(Unit) {
+        genderViewModel.getGendersFromFirestore()
+    }
+    val preferencesViewModel: PreferencesViewModel = viewModel()
     val auth = Firebase.auth
 
+    var currentUserId = auth.currentUser?.uid ?: ""
+    LaunchedEffect(Unit) {
+        currentUserId = auth.currentUser?.uid ?: ""
+    }
+
     NavHost(navController, startDestination = if (auth.currentUser != null) Routes.Home else Routes.Login) {
-//    NavHost(navController, startDestination = Routes.Login) {
 
         composable(Routes.SignUp) {
-            SignUpScreen(navController, profileViewModel, photoViewModel)
+            SignUpScreen(navController, profileViewModel, photoViewModel, genderViewModel)
         }
 
         composable(Routes.SignIn) {
@@ -46,7 +58,10 @@ fun DatingApp() {
             HomeScreen(
                 navController,
                 profileViewModel,
-                photoViewModel
+                photoViewModel,
+                preferencesViewModel,
+                genderViewModel,
+                currentUserId
             )
         }
 
@@ -59,7 +74,8 @@ fun DatingApp() {
         }
         composable(Routes.EditProfile) {
             EditProfileScreen(
-                viewModel = profileViewModel,
+                profileViewModel = profileViewModel,
+                genderViewModel = GenderViewModel(),
                 navController = navController,
                 onSave = { updatedUser ->
                     profileViewModel.saveUserToFirestore(

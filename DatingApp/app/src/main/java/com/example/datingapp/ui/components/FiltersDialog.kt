@@ -1,6 +1,7 @@
 package com.example.datingapp.ui.components
 
 import AgeRangeSelector
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,12 +34,39 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.datingapp.R
+import com.example.datingapp.data.PreferencesEntity
 import com.example.datingapp.ui.theme.MediumPink
+import com.example.datingapp.viewmodel.GenderViewModel
+import com.example.datingapp.viewmodel.PreferencesViewModel
 
 @Composable()
-fun FiltersDialog(isDialog: Boolean, onDialogChange: (Boolean) -> Unit) {
-    var selectedGender = remember { mutableStateOf("Male") }
+fun FiltersDialog(
+    preferencesViewModel: PreferencesViewModel,
+    genderViewModel: GenderViewModel,
+    currentUserId: String,
+    isDialog: Boolean,
+    onDialogChange: (Boolean) -> Unit,
+    onGenderChange: (String) -> Unit,
+    onAgeRangeChange: (Pair<Int, Int>) -> Unit,
+) {
+    var selectedGender by remember { mutableStateOf("Male") }
     var ageRange by remember { mutableStateOf(0 to 100) }
+    var genderId by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        preferencesViewModel.fetchPreferencesForUser(
+            currentUserId,
+            onSuccess = { preferences ->
+                genderId = preferences.gender
+                ageRange = (preferences.startAgeRange to preferences.endAgeRange)
+                Log.d("MyTag", "${ageRange.first} ${ageRange.second}")
+            },
+            onFailure = { error ->
+                Log.d("MyTag", error)
+            }
+        )
+    }
+
 
     if (isDialog) {
         Box(
@@ -84,7 +113,34 @@ fun FiltersDialog(isDialog: Boolean, onDialogChange: (Boolean) -> Unit) {
                         Spacer(modifier = Modifier.weight(1f))
                         IconButton(
                             modifier = Modifier.size(24.dp),
-                            onClick = { onDialogChange(false) }
+                            onClick = {
+                                genderViewModel.getIdByGenderName(
+                                    selectedGender,
+                                    onSuccess = { id ->
+                                        genderId = id
+                                        preferencesViewModel.savePreferencesToFirestore(
+                                            PreferencesEntity(
+                                                currentUserId,
+                                                genderId,
+                                                ageRange.first,
+                                                ageRange.second
+                                            ),
+                                            onSuccess = {
+                                                Log.d("MyTag", "Preferences successfully saved")
+                                                onGenderChange(genderId)
+                                                onAgeRangeChange(ageRange)
+                                            },
+                                            onFailure = { error ->
+                                                Log.d("MyTag", "Error saving preferences: ${error}")
+                                            }
+                                        )
+                                        onDialogChange(false)
+                                    },
+                                    onFailure = { error ->
+                                        Log.d("MyTag", error)
+                                    }
+                                )
+                            }
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_save_filters),
@@ -108,7 +164,7 @@ fun FiltersDialog(isDialog: Boolean, onDialogChange: (Boolean) -> Unit) {
                             textAlign = TextAlign.Left
                         )
                         Spacer(modifier = Modifier.height(6.dp))
-                        GenderPreferenceMenu(selectedGender = selectedGender.value, onGenderSelected = { selectedGender.value = it })
+                        GenderPreferenceMenu(selectedGender = selectedGender, onGenderSelected = { selectedGender = it })
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = "Age",
@@ -118,7 +174,9 @@ fun FiltersDialog(isDialog: Boolean, onDialogChange: (Boolean) -> Unit) {
                             textAlign = TextAlign.Left
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        AgeRangeSelector() { startAge, endAge ->
+                        AgeRangeSelector(
+                            initialRange = ageRange
+                        ) { startAge, endAge ->
                             ageRange = startAge to endAge
                         }
                     }
