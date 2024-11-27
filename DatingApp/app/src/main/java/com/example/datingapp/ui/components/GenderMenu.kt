@@ -13,28 +13,31 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.example.datingapp.data.GenderEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GenderMenu(onValueChange: (String) -> Unit) {
-    val options = listOf("Male", "Female")
+fun GenderMenu(
+    options: List<GenderEntity>,
+    selectedGender: String,
+    onValueChange: (String) -> Unit
+) {
+
     var expanded by remember { mutableStateOf(false) }
-    var selectedOptionText by remember { mutableStateOf(options[0]) }
+    var currentGender by remember { mutableStateOf(selectedGender) }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = {
-            expanded = !expanded
-        }
+        onExpandedChange = { expanded = !expanded }
     ) {
         OutlinedTextField(
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth(),
             readOnly = true,
-            value = selectedOptionText,
+            value = currentGender,
             onValueChange = {},
-            label = { Text("Gender") },
+            label = { Text(text = "Gender") },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
                     expanded = expanded
@@ -46,13 +49,13 @@ fun GenderMenu(onValueChange: (String) -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             onDismissRequest = { expanded = false }
         ) {
-            options.forEach { selectionOption ->
+            options.forEach { gender ->
                 DropdownMenuItem(
-                    text = { Text(text = selectionOption) },
+                    text = { Text(text = gender.genderName) },
                     onClick = {
-                        selectedOptionText = selectionOption
+                        currentGender = gender.genderName
                         expanded = false
-                        onValueChange(selectedOptionText)
+                        onValueChange(gender.genderName)
                     }
                 )
             }

@@ -14,9 +14,10 @@ import com.example.datingapp.ui.theme.MediumPink
 
 @Composable
 fun AgeRangeSelector(
+    initialRange: Pair<Int, Int>,
     onRangeSelected: (startAge: Int, endAge: Int) -> Unit
 ) {
-    var ageRange by remember { mutableStateOf(0f..100f) }
+    var ageRange by remember { mutableStateOf(initialRange.first.toFloat()..initialRange.second.toFloat()) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         val startAge = ageRange.start.toInt()

@@ -2,9 +2,6 @@ package com.example.datingapp.ui.screens
 
 import ProfileViewModel
 import android.app.DatePickerDialog
-import android.content.ContentResolver
-import android.net.Uri
-import android.util.Base64
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -25,7 +22,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,7 +41,7 @@ import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.components.EditableTextField
 import com.example.datingapp.ui.components.GenderMenu
 import com.example.datingapp.ui.theme.poppinsFontFamily
-import java.net.URI
+import com.example.datingapp.viewmodel.GenderViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -52,20 +51,26 @@ import java.util.Locale
 @Composable
 fun EditProfileScreen(
     navController: NavController,
-    viewModel: ProfileViewModel,
+    profileViewModel: ProfileViewModel,
+    genderViewModel: GenderViewModel,
     onSave: (UserEntity) -> Unit
 ) {
+
     val dateFormatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
 
-    var firstName by remember { mutableStateOf(viewModel.user.value.firstName) }
-    var secondName by remember { mutableStateOf(viewModel.user.value.secondName) }
-    var birthDate by remember { mutableStateOf(dateFormatter.format(viewModel.user.value.birthDate!!)) }
-    var location by remember { mutableStateOf(viewModel.user.value.location) }
-    var gender by remember { mutableStateOf(viewModel.user.value.gender.toString()) }
+    var firstName by remember { mutableStateOf(profileViewModel.user.value.firstName) }
+    var secondName by remember { mutableStateOf(profileViewModel.user.value.secondName) }
+    var birthDate by remember { mutableStateOf(dateFormatter.format(profileViewModel.user.value.birthDate!!)) }
+    var location by remember { mutableStateOf(profileViewModel.user.value.location) }
+    var gender by remember { mutableStateOf(profileViewModel.user.value.gender.toString()) }
 
+    LaunchedEffect(Unit) {
+        genderViewModel.getGendersFromFirestore()
+    }
+    val genders by genderViewModel.genders.observeAsState(emptyList())
 
     val calendar = remember { Calendar.getInstance() }
-    var selectedDate by remember { mutableStateOf(viewModel.user.value.birthDate ?: Date()) }
+    var selectedDate by remember { mutableStateOf(profileViewModel.user.value.birthDate ?: Date()) }
 
     val datePickerDialog = DatePickerDialog(
         navController.context, { _, year, month, dayOfMonth ->
@@ -111,13 +116,15 @@ fun EditProfileScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(
             text = "Account Settings",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
         )
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         EditableTextField(
             fieldValue = firstName,
@@ -150,18 +157,18 @@ fun EditProfileScreen(
             fieldName = "Location"
         )
 
-        GenderMenu(onValueChange = { gender = it })
+        GenderMenu(options = genders, selectedGender = gender) { selectedGender -> gender = selectedGender }
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = {
                 val updatedUser = UserEntity(
-                    uid = viewModel.user.value.uid,
+                    uid = profileViewModel.user.value.uid,
                     firstName = firstName,
                     secondName = secondName,
-                    emailAddress = viewModel.user.value.emailAddress,
-                    password = viewModel.user.value.password,
+                    emailAddress = profileViewModel.user.value.emailAddress,
+                    password = profileViewModel.user.value.password,
                     location = location,
                     birthDate = selectedDate,
                     gender = gender

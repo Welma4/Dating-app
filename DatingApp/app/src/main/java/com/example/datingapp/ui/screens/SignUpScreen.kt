@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -26,9 +27,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.datingapp.R
+import com.example.datingapp.data.GenderEntity
 import com.example.datingapp.data.Routes
 import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.theme.poppinsFontFamily
+import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -42,11 +45,14 @@ import java.util.*
 fun SignUpScreen(
     navController: NavController,
     profileViewModel: ProfileViewModel,
-    photoViewModel: PhotoViewModel
+    photoViewModel: PhotoViewModel,
+    genderViewModel: GenderViewModel
 ) {
 
     val auth = Firebase.auth
-    Log.d("MyLog", "User email: ${auth.currentUser?.email}")
+
+    val genders by genderViewModel.genders.observeAsState(emptyList())
+
     var errorState by remember { mutableStateOf("") }
     var isFirstNameError by remember { mutableStateOf(false) }
     var isSecondNameError by remember { mutableStateOf(false) }
@@ -107,7 +113,7 @@ fun SignUpScreen(
 
                 LoginTextField(value = secondName, label = "Second name", isSecondNameError) { secondName = it }
 
-                GenderDropMenu(onValueChange = { gender = it })
+                GenderDropMenu(options = genders) { selectedGender -> gender = selectedGender }
 
                 BirthDateField(birthDate = birthDate, isBirthDateError, onBirthDateChange = { birthDate = it }, navController)
 
@@ -188,10 +194,13 @@ fun SignUpScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GenderDropMenu(onValueChange: (String) -> Unit) {
-    val options = listOf("Male", "Female")
+fun GenderDropMenu(
+    options: List<GenderEntity>,
+    onValueChange: (String) -> Unit
+) {
+
     var expanded by remember { mutableStateOf(false) }
-    var selectedOptionText by remember { mutableStateOf(options[0]) }
+    var selectedOptionText by remember { mutableStateOf(options.firstOrNull()?.genderName ?: "")}
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -223,9 +232,9 @@ fun GenderDropMenu(onValueChange: (String) -> Unit) {
         ) {
             options.forEach { selectionOption ->
                 DropdownMenuItem(
-                    text = { Text(text = selectionOption) },
+                    text = { Text(text = selectionOption.genderName) },
                     onClick = {
-                        selectedOptionText = selectionOption
+                        selectedOptionText = selectionOption.genderName
                         expanded = false
                         onValueChange(selectedOptionText)
                     }
@@ -433,20 +442,9 @@ private fun signUp(
         }
 }
 
-private fun imageToBase64(uri: Uri, contentResolver: ContentResolver): String {
-    val inputStream = contentResolver.openInputStream(uri)
-
-    val bytes = inputStream?.readBytes()
-    return bytes?.let {
-        Base64.encodeToString(it, Base64.DEFAULT)
-    } ?: ""
-}
-
 fun bitmapToBase64(bitmap: Bitmap): String {
     val outputStream = ByteArrayOutputStream()
-    // Сжатие изображения в формате PNG. Можно изменить на JPEG, если нужно.
     bitmap.compress(Bitmap.CompressFormat.PNG, 10, outputStream)
     val byteArray = outputStream.toByteArray()
-    // Преобразование байтов в строку Base64
     return Base64.encodeToString(byteArray, Base64.DEFAULT)
 }
