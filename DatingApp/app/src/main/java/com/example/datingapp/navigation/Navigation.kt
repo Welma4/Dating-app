@@ -18,6 +18,7 @@ import com.example.datingapp.ui.screens.MessagesScreen
 import com.example.datingapp.ui.screens.ProfileScreen
 import com.example.datingapp.ui.screens.SignInScreen
 import com.example.datingapp.viewmodel.GenderViewModel
+import com.example.datingapp.viewmodel.LikeViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 import com.example.datingapp.viewmodel.PreferencesViewModel
 import com.google.firebase.Firebase
@@ -28,11 +29,12 @@ fun DatingApp() {
     val navController = rememberNavController()
     val profileViewModel: ProfileViewModel = viewModel()
     val photoViewModel: PhotoViewModel = viewModel()
+    val preferencesViewModel: PreferencesViewModel = viewModel()
     val genderViewModel: GenderViewModel = viewModel()
     LaunchedEffect(Unit) {
         genderViewModel.getGendersFromFirestore()
     }
-    val preferencesViewModel: PreferencesViewModel = viewModel()
+    val likeViewModel: LikeViewModel = viewModel()
     val auth = Firebase.auth
 
     var currentUserId = auth.currentUser?.uid ?: ""
@@ -61,6 +63,7 @@ fun DatingApp() {
                 photoViewModel,
                 preferencesViewModel,
                 genderViewModel,
+                likeViewModel,
                 currentUserId
             )
         }

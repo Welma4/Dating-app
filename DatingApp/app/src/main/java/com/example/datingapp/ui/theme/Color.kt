@@ -11,4 +11,6 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 val MediumPink = Color(0xFFAA3FEC)
+val LikePink = Color(0xFFE12CC2)
+val LikePinkAlpha = Color(0x66E12CC2)
 val MediumGray = Color(0xFF686868)
