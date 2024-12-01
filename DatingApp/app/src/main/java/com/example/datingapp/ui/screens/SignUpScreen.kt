@@ -1,38 +1,36 @@
-import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.datingapp.R
 import com.example.datingapp.data.GenderEntity
+import com.example.datingapp.data.PreferencesEntity
 import com.example.datingapp.data.Routes
 import com.example.datingapp.data.UserEntity
+import com.example.datingapp.ui.components.BirthDateField
+import com.example.datingapp.ui.components.LoginTextField
+import com.example.datingapp.ui.components.PasswordField
 import com.example.datingapp.ui.theme.poppinsFontFamily
 import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
+import com.example.datingapp.viewmodel.PreferencesViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -46,7 +44,8 @@ fun SignUpScreen(
     navController: NavController,
     profileViewModel: ProfileViewModel,
     photoViewModel: PhotoViewModel,
-    genderViewModel: GenderViewModel
+    genderViewModel: GenderViewModel,
+    preferencesViewModel: PreferencesViewModel
 ) {
 
     val auth = Firebase.auth
@@ -63,11 +62,22 @@ fun SignUpScreen(
 
     var firstName by remember { mutableStateOf("") }
     var secondName by remember { mutableStateOf("") }
-    var gender by remember { mutableStateOf("Male") }
+    var genderName by remember { mutableStateOf("Male") }
     var birthDate by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    var genderId by remember { mutableStateOf("") }
+    genderViewModel.getIdByGenderName(
+        genderName,
+        onSuccess = { result ->
+            genderId = result
+        },
+        onFailure = { error ->
+            Log.d("MyTag", error)
+        }
+    )
 
     val context = LocalContext.current
     Column(modifier = Modifier
@@ -113,7 +123,7 @@ fun SignUpScreen(
 
                 LoginTextField(value = secondName, label = "Second name", isSecondNameError) { secondName = it }
 
-                GenderDropMenu(options = genders) { selectedGender -> gender = selectedGender }
+                GenderDropMenu(options = genders) { selectedGender -> genderName = selectedGender }
 
                 BirthDateField(birthDate = birthDate, isBirthDateError, onBirthDateChange = { birthDate = it }, navController)
 
@@ -152,12 +162,13 @@ fun SignUpScreen(
                             signUp(
                                 profileViewModel,
                                 photoViewModel,
+                                preferencesViewModel,
                                 auth,
                                 email,
                                 password,
                                 firstName,
                                 secondName,
-                                gender,
+                                genderId,
                                 birthDate,
                                 location,
                                 context,
@@ -200,7 +211,7 @@ fun GenderDropMenu(
 ) {
 
     var expanded by remember { mutableStateOf(false) }
-    var selectedOptionText by remember { mutableStateOf(options.firstOrNull()?.genderName ?: "")}
+    var selectedOptionText by remember { mutableStateOf(options.firstOrNull()?.genderName ?: "Male")}
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -244,130 +255,11 @@ fun GenderDropMenu(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BirthDateField(
-        birthDate: String,
-        isError: Boolean = false,
-        onBirthDateChange: (String) -> Unit,
-        navController: NavController
-) {
-
-    val dateFormatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-    val calendar = remember { Calendar.getInstance() }
-    var selectedDate by remember { mutableStateOf(Calendar.getInstance().apply { set(1990, Calendar.JANUARY, 1)}.time) }
-    val datePickerDialog = android.app.DatePickerDialog(
-        navController.context, { _, year, month, dayOfMonth ->
-            calendar.set(year, month, dayOfMonth)
-            selectedDate = calendar.time
-            onBirthDateChange(dateFormatter.format(selectedDate))
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    )
-
-    TextField(
-        value = birthDate,
-        onValueChange = onBirthDateChange,
-        trailingIcon = {
-            IconButton(onClick = { datePickerDialog.show() }) {
-                Icon(imageVector = Icons.Default.ArrowDropDown , contentDescription = "Calendar")
-            }
-        },
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color.White,
-            focusedIndicatorColor = Color.Gray,
-            unfocusedIndicatorColor = if (isError) Color.Red else Color.Gray,
-            focusedPlaceholderColor = Color.Gray,
-            unfocusedPlaceholderColor = if (isError) Color.Red else Color.Gray,
-        ),
-        placeholder = { Text("Date of Birth") },
-        readOnly = true,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun LoginTextField(
-    value: String,
-    label: String,
-    isError: Boolean = false,
-    onValueChange: (String) -> Unit
-) {
-    val focusRequester = remember { FocusRequester() }
-    var isFocused by remember { mutableStateOf(false) }
-
-    TextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .focusRequester(focusRequester)
-            .onFocusChanged { focusState ->
-                isFocused = focusState.isFocused
-            },
-        value = value,
-        label = {
-            Text(
-                text = label,
-                color = when {
-                    isFocused -> Color.Gray
-                    isError -> Color.Red
-                    else -> Color.Gray
-                }
-            )
-        },
-        onValueChange = onValueChange,
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color.White,
-            focusedIndicatorColor = Color.Gray,
-            unfocusedIndicatorColor = if (isError) Color.Red else Color.Gray
-        ),
-        singleLine = true
-    )
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PasswordField(password: String, isError: Boolean = false, onPasswordChange: (String) -> Unit) {
-    val focusRequester = remember { FocusRequester() }
-    var isFocused by remember { mutableStateOf(false) }
-
-    TextField(
-        value = password,
-        onValueChange = onPasswordChange,
-        label = {
-            Text(
-                text = "Password",
-                color = when {
-                    isFocused -> Color.Gray
-                    isError -> Color.Red
-                    else -> Color.Gray
-                }
-            )
-        },
-        visualTransformation = PasswordVisualTransformation(),
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color.White,
-            focusedIndicatorColor = Color.Gray,
-            unfocusedIndicatorColor = if (isError) Color.Red else Color.Gray
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .focusRequester(focusRequester)
-            .onFocusChanged { focusState ->
-                isFocused = focusState.isFocused
-            },
-    )
-}
 
 private fun signUp(
     profileViewModel: ProfileViewModel,
     photoViewModel: PhotoViewModel,
+    preferencesViewModel: PreferencesViewModel,
     auth: FirebaseAuth,
     email: String,
     password: String,
@@ -420,12 +312,27 @@ private fun signUp(
                             idUser = uid,
                             photoBase64 = photoBase64,
                             onSuccess = {
-                                onSignUpSuccess()
+                                preferencesViewModel.savePreferencesToFirestore(
+                                    PreferencesEntity(
+                                        idUser = uid,
+                                        gender = maleGender,
+                                        startAgeRange = 0,
+                                        endAgeRange = 100
+                                    ),
+                                    onSuccess = {
+                                        onSignUpSuccess()
+                                    },
+                                    onFailure = { error ->
+                                        onSignUpFailure("User created, but preferences error: $error")
+                                    }
+                                )
+
                             },
                             onFailure = { error ->
                                 onSignUpFailure("User created, but photo error: $error")
                             }
                         )
+
                     },
                     onFailure = { error ->
                         onSignUpFailure(error)
@@ -448,3 +355,5 @@ fun bitmapToBase64(bitmap: Bitmap): String {
     val byteArray = outputStream.toByteArray()
     return Base64.encodeToString(byteArray, Base64.DEFAULT)
 }
+
+                                                                                                                                                                                                                                    val maleGender = "7QcWbM1utFFkcr0l808a"
