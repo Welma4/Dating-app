@@ -45,7 +45,13 @@ fun DatingApp() {
     NavHost(navController, startDestination = if (auth.currentUser != null) Routes.Home else Routes.Login) {
 
         composable(Routes.SignUp) {
-            SignUpScreen(navController, profileViewModel, photoViewModel, genderViewModel)
+            SignUpScreen(
+                navController,
+                profileViewModel,
+                photoViewModel,
+                genderViewModel,
+                preferencesViewModel
+            )
         }
 
         composable(Routes.SignIn) {
@@ -72,7 +78,8 @@ fun DatingApp() {
             ProfileScreen(
                 navController,
                 profileViewModel,
-                photoViewModel
+                photoViewModel,
+                genderViewModel
             )
         }
         composable(Routes.EditProfile) {
@@ -97,7 +104,13 @@ fun DatingApp() {
         }
 
         composable(Routes.Likes) {
-            LikeScreen(navController)
+            LikeScreen(
+                navController,
+                currentUserId,
+                profileViewModel,
+                likeViewModel,
+                photoViewModel
+            )
         }
 
         composable(Routes.Messages) {

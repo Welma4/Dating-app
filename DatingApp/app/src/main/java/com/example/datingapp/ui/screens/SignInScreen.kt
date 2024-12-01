@@ -1,7 +1,5 @@
 package com.example.datingapp.ui.screens
 
-import LoginTextField
-import PasswordField
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,12 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.datingapp.data.Routes
+import com.example.datingapp.ui.components.LoginTextField
+import com.example.datingapp.ui.components.PasswordField
 import com.example.datingapp.ui.theme.poppinsFontFamily
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -28,7 +27,6 @@ import com.google.firebase.auth.auth
 @Composable
 fun SignInScreen(navController: NavController) {
     val auth = Firebase.auth
-//    Log.d("MyLog", "User email: ${auth.currentUser?.email}")
 
     var errorState by remember { mutableStateOf("") }
     var isEmailError by remember { mutableStateOf(false) }

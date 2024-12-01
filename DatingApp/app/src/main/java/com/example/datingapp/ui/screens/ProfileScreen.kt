@@ -63,6 +63,7 @@ import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
 import coil.compose.rememberAsyncImagePainter
+import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 
 
@@ -71,7 +72,8 @@ import com.example.datingapp.viewmodel.PhotoViewModel
 fun ProfileScreen(
     navController: NavController,
     profileViewModel: ProfileViewModel,
-    photoViewModel: PhotoViewModel
+    photoViewModel: PhotoViewModel,
+    genderViewModel: GenderViewModel
 ) {
 
     val cr = LocalContext.current.contentResolver
@@ -143,6 +145,17 @@ fun ProfileScreen(
     val gradientColors = listOf(
         Color(0xFFA020F0),
         Color(0xFFBC7BE4)
+    )
+
+    var genderName by remember { mutableStateOf("") }
+    genderViewModel.getGenderNameById(
+        idGender = user.gender,
+        onSuccess = { result ->
+            genderName = result
+        },
+        onFailure = { error ->
+            Log.d("MyTag", error)
+        }
     )
 
     Scaffold(bottomBar = { NavigationMenu(navController) }) {
@@ -246,7 +259,7 @@ fun ProfileScreen(
                 ProfileField(label = "Date of birth", value = formattedDate)
                 ProfileField(label = "Email", value = user.emailAddress)
                 ProfileField(label = "Location", value = user.location)
-                ProfileField(label = "Gender", user.gender)
+                ProfileField(label = "Gender", value = genderName)
 
                 Spacer(modifier = Modifier.height(20.dp))
 

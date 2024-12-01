@@ -1,6 +1,8 @@
 package com.example.datingapp.ui.screens
 
+import ProfileViewModel
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,48 +18,96 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.VerticalAlignmentLine
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.datingapp.R
+import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.components.CustomButton
 import com.example.datingapp.ui.components.NavigationMenu
+import com.example.datingapp.ui.theme.MediumGray
+import com.example.datingapp.ui.utils.calculateAge
+import com.example.datingapp.viewmodel.LikeViewModel
+import com.example.datingapp.viewmodel.PhotoViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun LikeScreen(navController: NavController) {
-    val photos = listOf(
-        R.drawable.default_user_photo,
-        R.drawable.default_user_photo2,
-        R.drawable.default_user_photo,
-        R.drawable.default_user_photo2,
-        R.drawable.default_user_photo,
-        R.drawable.default_user_photo2,
-        R.drawable.default_user_photo,
-    )
+fun LikeScreen(
+    navController: NavController,
+    currentUserId: String,
+    profileViewModel: ProfileViewModel,
+    likeViewModel: LikeViewModel,
+    photoViewModel: PhotoViewModel
+) {
+    val likedUsers = remember { mutableStateOf<List<Pair<UserEntity, Bitmap?>>>(emptyList()) }
+    val isLoading = remember { mutableStateOf(true) }
 
-    val names = listOf(
-        "Grigoriy Petrov, 31\nSt. Petersburg",
-        "Anna Ivanova, 25\nMoscow",
-        "Grigoriy Petrov, 31\nSt. Petersburg",
-        "Anna Ivanova, 25\nMoscow",
-        "Sergey Kuznetsov, 28\nNovosibirsk",
-        "Elena Smirnova, 22\nKazan",
-        "Viktor Sokolov, 35\nYekaterinburg",
-        "Olga Fedorova, 27\nSochi"
-    )
+    LaunchedEffect(Unit) {
+        likeViewModel.fetchLikedUsers(
+            currentUserId,
+            onSuccess = { likedUserIds ->
+                val userPhotos = mutableListOf<Pair<UserEntity, Bitmap?>>()
+                val remainingIds = likedUserIds.toMutableList()
+                likedUserIds.forEach { userId ->
+                    profileViewModel.fetchUserFromFirestore(
+                        uid = userId,
+                        onSuccess = { user ->
+                            photoViewModel.getPhotoBitmap(
+                                idUser = userId,
+                                onSuccess = { bitmap ->
+                                    userPhotos.add(user to bitmap)
+                                    remainingIds.remove(userId)
+                                    if (remainingIds.isEmpty()) {
+                                        likedUsers.value = userPhotos
+                                        isLoading.value = false
+                                    }
+                                },
+                                onFailure = {
+                                    userPhotos.add(user to null)
+                                    remainingIds.remove(userId)
+                                    if (remainingIds.isEmpty()) {
+                                        likedUsers.value = userPhotos
+                                        isLoading.value = false
+                                    }
+                                }
+                            )
+                        },
+                        onFailure = {
+                            remainingIds.remove(userId)
+                            if (remainingIds.isEmpty()) {
+                                isLoading.value = false
+                            }
+                        }
+                    )
+                }
+            },
+            onFailure = {
+                isLoading.value = false
+            }
+        )
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -97,20 +147,25 @@ fun LikeScreen(navController: NavController) {
                     .padding(bottom = 16.dp)
             )
 
-            Text(
-                text = "${photos.size} Likes",
-                fontSize = 16.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxSize().padding(bottom = 55.dp)
-            ) {
-                itemsIndexed(photos) { index, photoResId ->
-                    UserCard(photoResId = photoResId, userInfo = names[index % names.size])
+            if (isLoading.value) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(200.dp)
+                            .align(Alignment.Center)
+                    )
+                }
+            }
+            else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize().padding(bottom = 55.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    itemsIndexed(likedUsers.value) { _, (user, photo) ->
+                        UserCard(user = user, photo = photo)
+                    }
                 }
             }
         }
@@ -118,32 +173,47 @@ fun LikeScreen(navController: NavController) {
 }
 
 @Composable
-fun UserCard(photoResId: Int, userInfo: String) {
+fun UserCard(user: UserEntity, photo: Bitmap?) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(220.dp)
-            .clip(RoundedCornerShape(16.dp)),
+            .height(220.dp),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Image(
-                painter = painterResource(id = photoResId),
-                contentDescription = "User Photo",
-                contentScale = ContentScale.Crop,
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if (photo != null) {
+                Image(
+                    bitmap = photo.asImageBitmap(),
+                    contentDescription = "${user.firstName}'s photo",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp)
-            )
-            Text(
-                text = userInfo,
-                color = Color.White,
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(8.dp)
-            )
+                    .fillMaxSize()
+                    .padding(6.dp),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = "${user.firstName} ${user.secondName}, ${calculateAge(user.birthDate!!)}",
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    fontSize = 14.sp,
+                    style = TextStyle(shadow = Shadow(MediumGray, Offset(5.0f, 2.0f), 1.0f))
+                )
+                Text(
+                    text = user.location,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    fontSize = 14.sp,
+                    style = TextStyle(shadow = Shadow(MediumGray, Offset(5.0f, 2.0f), 1.0f))
+                )
+            }
         }
     }
 }
-

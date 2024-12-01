@@ -35,4 +35,23 @@ class LikeViewModel : ViewModel() {
             }
     }
 
+    fun fetchLikedUsers(
+        currentUserId: String,
+        onSuccess: (List<String>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        db.collection("like")
+            .whereEqualTo("idUser", currentUserId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val likedUsers = querySnapshot.documents.mapNotNull { document ->
+                    document.getString("idLikedUser")
+                }
+                onSuccess(likedUsers)
+            }
+            .addOnFailureListener { error ->
+                onFailure(error.message ?: "Error fetching liked users")
+            }
+    }
+
 }

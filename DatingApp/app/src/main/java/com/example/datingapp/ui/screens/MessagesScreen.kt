@@ -10,7 +10,10 @@ import com.example.datingapp.ui.components.NavigationMenu
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun MessagesScreen(navController: NavController) {
+fun MessagesScreen(
+    navController: NavController,
+) {
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = { NavigationMenu(navController) }
@@ -18,3 +21,6 @@ fun MessagesScreen(navController: NavController) {
 
     }
 }
+
+
+
