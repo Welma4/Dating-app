@@ -162,7 +162,7 @@ fun SignUpScreen(
                                 location,
                                 context,
                                 onSignUpSuccess = {
-                                    navController.navigate(Routes.Profile)
+                                    navController.navigate(Routes.PhotoRequirement)
                                 },
                                 onSignUpFailure = { error ->
                                     errorState = error

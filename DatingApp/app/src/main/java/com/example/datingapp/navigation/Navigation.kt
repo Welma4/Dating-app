@@ -15,6 +15,7 @@ import com.example.datingapp.ui.screens.HomeScreen
 import com.example.datingapp.ui.screens.LikeScreen
 import com.example.datingapp.ui.screens.LoginScreen
 import com.example.datingapp.ui.screens.MessagesScreen
+import com.example.datingapp.ui.screens.PhotoRequirementScreen
 import com.example.datingapp.ui.screens.ProfileScreen
 import com.example.datingapp.ui.screens.SignInScreen
 import com.example.datingapp.viewmodel.GenderViewModel
@@ -103,5 +104,10 @@ fun DatingApp() {
         composable(Routes.Messages) {
             MessagesScreen(navController)
         }
+
+        composable(Routes.PhotoRequirement) {
+            PhotoRequirementScreen(navController)
+        }
+
     }
 }
