@@ -11,11 +11,12 @@ import androidx.navigation.compose.rememberNavController
 import com.example.datingapp.data.Routes
 import com.example.datingapp.ui.screens.EditProfileScreen
 import com.example.datingapp.ui.screens.HomeScreen
-import com.example.datingapp.ui.screens.LikeScreen
+import com.example.datingapp.ui.screens.LikedScreen
 import com.example.datingapp.ui.screens.LoginScreen
 import com.example.datingapp.ui.screens.MessagesScreen
 import com.example.datingapp.ui.screens.ProfileScreen
 import com.example.datingapp.ui.screens.SignInScreen
+import com.example.datingapp.ui.screens.YouLikedScreen
 import com.example.datingapp.viewmodel.PhotoViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -77,12 +78,15 @@ fun DatingApp() {
             )
         }
 
-        composable(Routes.Likes) {
-            LikeScreen(navController)
+        composable(Routes.Likes){
+            LikedScreen(navController)
         }
 
         composable(Routes.Messages) {
             MessagesScreen(navController)
+        }
+        composable(Routes.YouLiked) {
+            YouLikedScreen(navController)
         }
     }
 }

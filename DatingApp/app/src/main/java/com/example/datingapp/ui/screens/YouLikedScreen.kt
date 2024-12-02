@@ -34,7 +34,7 @@ import com.example.datingapp.R
 import com.example.datingapp.data.Routes
 import com.example.datingapp.ui.components.NavigationMenu
 
-data class LikedUser(
+data class User(
     val firstName: String,
     val lastName: String,
     val age: Int,
@@ -44,14 +44,14 @@ data class LikedUser(
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun LikedScreen(navController: NavController) {
+fun YouLikedScreen(navController: NavController) {
     val users = listOf(
-        LikedUser("Grigoriy", "Petrov", 31, "St. Petersburg", R.drawable.default_user_photo),
-        LikedUser("Anna", "Ivanova", 25, "Moscow", R.drawable.default_user_photo2),
-        LikedUser("Sergey", "Kuznetsov", 28, "Novosibirsk", R.drawable.default_user_photo),
-        LikedUser("Elena", "Smirnova", 22, "Kazan", R.drawable.default_user_photo2),
-        LikedUser("Viktor", "Sokolov", 35, "Yekaterinburg", R.drawable.default_user_photo),
-        LikedUser("Olga", "Fedorova", 27, "Sochi", R.drawable.default_user_photo2)
+        User("Grigoriy", "Petrov", 31, "St. Petersburg", R.drawable.default_user_photo),
+        User("Anna", "Ivanova", 25, "Moscow", R.drawable.default_user_photo2),
+        User("Sergey", "Kuznetsov", 28, "Novosibirsk", R.drawable.default_user_photo),
+        User("Elena", "Smirnova", 22, "Kazan", R.drawable.default_user_photo2),
+        User("Viktor", "Sokolov", 35, "Yekaterinburg", R.drawable.default_user_photo),
+        User("Olga", "Fedorova", 27, "Sochi", R.drawable.default_user_photo2)
     )
 
     Scaffold(
@@ -71,7 +71,7 @@ fun LikedScreen(navController: NavController) {
                 }
 
                 Text(
-                    text = "Likes",
+                    text = "You Liked",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Center)
@@ -79,15 +79,15 @@ fun LikedScreen(navController: NavController) {
             }
 
             CustomButton(
-                text = "SEE WHO YOU LIKED",
-                onClick = { navController.navigate(Routes.YouLiked) },
+                text = "SEE WHO LIKES YOU",
+                onClick = {navController.navigate(Routes.Likes)},
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
             )
 
             Text(
-                text = "${users.size} Likes",
+                text = "${users.size} Liked",
                 fontSize = 16.sp,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
@@ -107,7 +107,7 @@ fun LikedScreen(navController: NavController) {
 }
 
 @Composable
-fun UserCard(user: LikedUser) {
+fun UserCard(user: User) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
