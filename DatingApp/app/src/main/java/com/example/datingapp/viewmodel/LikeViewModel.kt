@@ -22,7 +22,7 @@ class LikeViewModel : ViewModel() {
                 if (querySnapshot.isEmpty) {
                     likeCol
                         .add(likeEntity)
-                        .addOnFailureListener() {
+                        .addOnSuccessListener() {
                             onSuccess()
                         }
                         .addOnFailureListener() { error ->
@@ -46,6 +46,25 @@ class LikeViewModel : ViewModel() {
             .addOnSuccessListener { querySnapshot ->
                 val likedUsers = querySnapshot.documents.mapNotNull { document ->
                     document.getString("idLikedUser")
+                }
+                onSuccess(likedUsers)
+            }
+            .addOnFailureListener { error ->
+                onFailure(error.message ?: "Error fetching liked users")
+            }
+    }
+
+    fun fetchUsersWhoLikedCurrent(
+        currentUserId: String,
+        onSuccess: (List<String>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        db.collection("like")
+            .whereEqualTo("idLikedUser", currentUserId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val likedUsers = querySnapshot.documents.mapNotNull { document ->
+                    document.getString("idUser")
                 }
                 onSuccess(likedUsers)
             }
