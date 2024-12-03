@@ -2,6 +2,7 @@ package com.example.datingapp.ui.screens
 
 import ProfileViewModel
 import android.app.DatePickerDialog
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -55,19 +56,33 @@ fun EditProfileScreen(
     genderViewModel: GenderViewModel,
     onSave: (UserEntity) -> Unit
 ) {
-
     val dateFormatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
 
     var firstName by remember { mutableStateOf(profileViewModel.user.value.firstName) }
     var secondName by remember { mutableStateOf(profileViewModel.user.value.secondName) }
     var birthDate by remember { mutableStateOf(dateFormatter.format(profileViewModel.user.value.birthDate!!)) }
     var location by remember { mutableStateOf(profileViewModel.user.value.location) }
-    var gender by remember { mutableStateOf(profileViewModel.user.value.gender.toString()) }
+    var genderId by remember { mutableStateOf(profileViewModel.user.value.gender) }
+    var gender by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         genderViewModel.getGendersFromFirestore()
+        if (genderId.isNotEmpty()) {
+            genderViewModel.getGenderNameById(
+                genderId,
+                onSuccess = { result -> gender = result },
+                onFailure = { error -> Log.d("MyTag", error) }
+            )
+        }
     }
+
     val genders by genderViewModel.genders.observeAsState(emptyList())
+
+    var isLoadingGender by remember { mutableStateOf(gender.isEmpty()) }
+    LaunchedEffect(gender) {
+        isLoadingGender = if (gender.isEmpty()) true else false
+        Log.d("MyTag", "AAAAAAAAAAAAAAAAAAAAAA ${gender} AAAA ${isLoadingGender}")
+    }
 
     val calendar = remember { Calendar.getInstance() }
     var selectedDate by remember { mutableStateOf(profileViewModel.user.value.birthDate ?: Date()) }
@@ -157,7 +172,18 @@ fun EditProfileScreen(
             fieldName = "Location"
         )
 
-        GenderMenu(options = genders, selectedGender = gender) { selectedGender -> gender = selectedGender }
+        GenderMenu(
+            options = genders,
+            selectedGender = if (!isLoadingGender) gender else "",
+            onValueChange = { selectedGender ->
+                gender = selectedGender
+                genderViewModel.getIdByGenderName(
+                    selectedGender,
+                    onSuccess = { result -> genderId = result },
+                    onFailure = { error -> Log.d("MyTag", error) }
+                )
+            }
+        )
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -171,7 +197,7 @@ fun EditProfileScreen(
                     password = profileViewModel.user.value.password,
                     location = location,
                     birthDate = selectedDate,
-                    gender = gender
+                    gender = genderId
                 )
                 onSave(updatedUser)
                 navController.navigate(Routes.Profile)

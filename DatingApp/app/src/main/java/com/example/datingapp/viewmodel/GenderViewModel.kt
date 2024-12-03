@@ -87,7 +87,6 @@ class GenderViewModel : ViewModel() {
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit
     ) {
-        Log.d("MyTag", "GENDER VIEWMODEL: ${idGender}")
         db.collection("gender")
             .document(idGender)
             .get()
@@ -95,7 +94,6 @@ class GenderViewModel : ViewModel() {
                 if (documentSnapshot.exists()) {
                     val genderName = documentSnapshot.getString("genderName")
                     if (genderName != null) {
-                        Log.d("MyTag", "GENDER VIEWMODEL: ${genderName}")
                         onSuccess(genderName)
                     } else {
                         onFailure("Gender name was not found")

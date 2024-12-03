@@ -48,6 +48,7 @@ import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.components.CustomButton
 import com.example.datingapp.ui.components.NavigationMenu
 import com.example.datingapp.ui.theme.MediumGray
+import com.example.datingapp.ui.theme.MediumPink
 import com.example.datingapp.ui.utils.calculateAge
 import com.example.datingapp.viewmodel.LikeViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
@@ -62,9 +63,12 @@ fun LikeScreen(
     photoViewModel: PhotoViewModel
 ) {
     val likedUsers = remember { mutableStateOf<List<Pair<UserEntity, Bitmap?>>>(emptyList()) }
+    val usersWhoLiked = remember { mutableStateOf<List<Pair<UserEntity, Bitmap?>>>(emptyList()) }
     val isLoading = remember { mutableStateOf(true) }
+    val isShowingLikedUsers = remember { mutableStateOf(true) }
 
-    LaunchedEffect(Unit) {
+    fun loadLikedUsers() {
+        isLoading.value = true
         likeViewModel.fetchLikedUsers(
             currentUserId,
             onSuccess = { likedUserIds ->
@@ -109,6 +113,56 @@ fun LikeScreen(
         )
     }
 
+    fun loadUsersWhoLiked() {
+        isLoading.value = true
+        likeViewModel.fetchUsersWhoLikedCurrent(
+            currentUserId,
+            onSuccess = { userWhoLikedIds ->
+                val userPhotos = mutableListOf<Pair<UserEntity, Bitmap?>>()
+                val remainingIds = userWhoLikedIds.toMutableList()
+                userWhoLikedIds.forEach { userId ->
+                    profileViewModel.fetchUserFromFirestore(
+                        uid = userId,
+                        onSuccess = { user ->
+                            photoViewModel.getPhotoBitmap(
+                                idUser = userId,
+                                onSuccess = { bitmap ->
+                                    userPhotos.add(user to bitmap)
+                                    remainingIds.remove(userId)
+                                    if (remainingIds.isEmpty()) {
+                                        usersWhoLiked.value = userPhotos
+                                        isLoading.value = false
+                                    }
+                                },
+                                onFailure = {
+                                    userPhotos.add(user to null)
+                                    remainingIds.remove(userId)
+                                    if (remainingIds.isEmpty()) {
+                                        usersWhoLiked.value = userPhotos
+                                        isLoading.value = false
+                                    }
+                                }
+                            )
+                        },
+                        onFailure = {
+                            remainingIds.remove(userId)
+                            if (remainingIds.isEmpty()) {
+                                isLoading.value = false
+                            }
+                        }
+                    )
+                }
+            },
+            onFailure = {
+                isLoading.value = false
+            }
+        )
+    }
+
+    LaunchedEffect(Unit) {
+        loadLikedUsers()
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = { NavigationMenu(navController) }
@@ -140,8 +194,15 @@ fun LikeScreen(
             }
 
             CustomButton(
-                text = "SEE WHO LIKES YOU",
-                onClick = {  },
+                text = if (isShowingLikedUsers.value) "SEE WHO LIKES YOU" else "SEE WHO YOU LIKE",
+                onClick = {
+                    if (isShowingLikedUsers.value) {
+                        loadUsersWhoLiked()
+                    } else {
+                        loadLikedUsers()
+                    }
+                    isShowingLikedUsers.value = !isShowingLikedUsers.value
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
@@ -152,18 +213,20 @@ fun LikeScreen(
                     CircularProgressIndicator(
                         modifier = Modifier
                             .size(200.dp)
-                            .align(Alignment.Center)
+                            .align(Alignment.Center),
+                        color = MediumPink
                     )
                 }
-            }
-            else {
+            } else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize().padding(bottom = 55.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    itemsIndexed(likedUsers.value) { _, (user, photo) ->
+                    val usersToDisplay =
+                        if (isShowingLikedUsers.value) likedUsers.value else usersWhoLiked.value
+                    itemsIndexed(usersToDisplay) { _, (user, photo) ->
                         UserCard(user = user, photo = photo)
                     }
                 }
@@ -171,6 +234,7 @@ fun LikeScreen(
         }
     }
 }
+
 
 @Composable
 fun UserCard(user: UserEntity, photo: Bitmap?) {
