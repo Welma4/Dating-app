@@ -9,4 +9,5 @@ object Routes {
     const val EditProfile = "EditProfileScreen"
     const val Likes = "LikesScreen"
     const val Messages = "MessagesScreen"
+    const val PhotoRequest = "PhotoRequestScreen"
 }
