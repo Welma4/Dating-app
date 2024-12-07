@@ -173,7 +173,7 @@ fun SignUpScreen(
                                 location,
                                 context,
                                 onSignUpSuccess = {
-                                    navController.navigate(Routes.Profile)
+                                    navController.navigate(Routes.PhotoRequest)
                                 },
                                 onSignUpFailure = { error ->
                                     errorState = error
@@ -356,4 +356,4 @@ fun bitmapToBase64(bitmap: Bitmap): String {
     return Base64.encodeToString(byteArray, Base64.DEFAULT)
 }
 
-                                                                                                                                                                                                                                    val maleGender = "7QcWbM1utFFkcr0l808a"
+                                                                                                                                                                                                                                    const val maleGender = "7QcWbM1utFFkcr0l808a"

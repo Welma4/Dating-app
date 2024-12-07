@@ -99,7 +99,6 @@ class ProfileViewModel : ViewModel() {
                     val user = document.toObject(UserEntity::class.java)
                     user?.let {
                         val age = it.birthDate?.let { birthDate -> calculateAge(birthDate) }
-//                        Log.d("MyTag", "1: ${gender},  2: ${it.gender}")
                         if ((age in startAgeRange..endAgeRange) && (it.uid != currentUserUid) && (it.gender == gender)) {
                             user
                         } else {

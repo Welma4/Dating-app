@@ -63,6 +63,7 @@ import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
 import coil.compose.rememberAsyncImagePainter
+import com.example.datingapp.ui.utils.imageToBase64
 import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 
@@ -324,13 +325,6 @@ private fun signOut(auth: FirebaseAuth) {
     auth.signOut()
 }
 
-private fun imageToBase64(uri: Uri, contentResolver: ContentResolver): String {
-    val inputStream = contentResolver.openInputStream(uri)
 
-    val bytes = inputStream?.readBytes()
-    return bytes?.let {
-        Base64.encodeToString(it, Base64.DEFAULT)
-    } ?: ""
-}
 
 

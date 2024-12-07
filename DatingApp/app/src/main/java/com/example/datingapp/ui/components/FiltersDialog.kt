@@ -38,12 +38,12 @@ import com.example.datingapp.data.PreferencesEntity
 import com.example.datingapp.ui.theme.MediumPink
 import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.PreferencesViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable()
 fun FiltersDialog(
     preferencesViewModel: PreferencesViewModel,
     genderViewModel: GenderViewModel,
-    currentUserId: String,
     isDialog: Boolean,
     onDialogChange: (Boolean) -> Unit,
     onGenderChange: (String) -> Unit,
@@ -55,7 +55,7 @@ fun FiltersDialog(
 
     LaunchedEffect(Unit) {
         preferencesViewModel.fetchPreferencesForUser(
-            currentUserId,
+            FirebaseAuth.getInstance().currentUser?.uid ?: "",
             onSuccess = { preferences ->
                 genderId = preferences.gender
                 ageRange = (preferences.startAgeRange to preferences.endAgeRange)
@@ -120,7 +120,7 @@ fun FiltersDialog(
                                         genderId = id
                                         preferencesViewModel.savePreferencesToFirestore(
                                             PreferencesEntity(
-                                                currentUserId,
+                                                FirebaseAuth.getInstance().currentUser?.uid ?: "",
                                                 genderId,
                                                 ageRange.first,
                                                 ageRange.second
