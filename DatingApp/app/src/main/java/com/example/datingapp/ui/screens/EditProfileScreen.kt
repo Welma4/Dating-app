@@ -81,7 +81,6 @@ fun EditProfileScreen(
     var isLoadingGender by remember { mutableStateOf(gender.isEmpty()) }
     LaunchedEffect(gender) {
         isLoadingGender = if (gender.isEmpty()) true else false
-        Log.d("MyTag", "AAAAAAAAAAAAAAAAAAAAAA ${gender} AAAA ${isLoadingGender}")
     }
 
     val calendar = remember { Calendar.getInstance() }
