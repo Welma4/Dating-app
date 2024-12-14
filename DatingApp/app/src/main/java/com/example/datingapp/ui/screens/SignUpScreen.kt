@@ -25,9 +25,11 @@ import com.example.datingapp.data.PreferencesEntity
 import com.example.datingapp.data.Routes
 import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.components.BirthDateField
+import com.example.datingapp.ui.components.GenderDropMenu
 import com.example.datingapp.ui.components.LoginTextField
 import com.example.datingapp.ui.components.PasswordField
 import com.example.datingapp.ui.theme.poppinsFontFamily
+import com.example.datingapp.ui.utils.bitmapToBase64
 import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 import com.example.datingapp.viewmodel.PreferencesViewModel
@@ -203,57 +205,7 @@ fun SignUpScreen(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GenderDropMenu(
-    options: List<GenderEntity>,
-    onValueChange: (String) -> Unit
-) {
 
-    var expanded by remember { mutableStateOf(false) }
-    var selectedOptionText by remember { mutableStateOf(options.firstOrNull()?.genderName ?: "Male")}
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
-    ) {
-        TextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(),
-            placeholder = { Text(text = "Gender") },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White,
-                focusedIndicatorColor = Color.Gray,
-                unfocusedIndicatorColor = Color.Gray
-            ),
-            readOnly = true,
-            value = selectedOptionText,
-            onValueChange = {},
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded
-                )
-            },
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            modifier = Modifier.width(150.dp),
-            onDismissRequest = { expanded = false }
-        ) {
-            options.forEach { selectionOption ->
-                DropdownMenuItem(
-                    text = { Text(text = selectionOption.genderName) },
-                    onClick = {
-                        selectedOptionText = selectionOption.genderName
-                        expanded = false
-                        onValueChange(selectedOptionText)
-                    }
-                )
-            }
-        }
-    }
-}
 
 
 private fun signUp(
@@ -349,11 +301,4 @@ private fun signUp(
         }
 }
 
-fun bitmapToBase64(bitmap: Bitmap): String {
-    val outputStream = ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.PNG, 10, outputStream)
-    val byteArray = outputStream.toByteArray()
-    return Base64.encodeToString(byteArray, Base64.DEFAULT)
-}
-
-                                                                                                                                                                                                                                    const val maleGender = "7QcWbM1utFFkcr0l808a"
+                                                                                                                                                                                                                  const val maleGender = "7QcWbM1utFFkcr0l808a"

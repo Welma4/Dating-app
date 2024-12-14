@@ -63,6 +63,7 @@ import com.google.firebase.auth.auth
 import java.text.SimpleDateFormat
 import java.util.Locale
 import coil.compose.rememberAsyncImagePainter
+import com.example.datingapp.ui.components.ProfileField
 import com.example.datingapp.ui.utils.imageToBase64
 import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
@@ -285,40 +286,6 @@ fun ProfileScreen(
         }
     }
 
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ProfileField(label: String, value: String) {
-    Column(modifier = Modifier.padding(vertical = 5.dp)) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = {},
-            readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 3.dp),
-            textStyle = TextStyle(
-                fontSize = 14.sp,
-                fontFamily = poppinsFontFamily
-            ),
-            label = {
-                Text(
-                    text = label,
-                    fontSize = 12.sp,
-                    color = Color.Gray,
-                    fontFamily = poppinsFontFamily
-                )
-            },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                unfocusedLabelColor = Color.Gray,
-                focusedLabelColor = Color.Gray,
-                disabledTextColor = Color.Black,
-                disabledBorderColor = Color.Gray
-            )
-        )
-    }
 }
 
 private fun signOut(auth: FirebaseAuth) {
