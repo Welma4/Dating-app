@@ -59,7 +59,6 @@ fun FiltersDialog(
             onSuccess = { preferences ->
                 genderId = preferences.gender
                 ageRange = (preferences.startAgeRange to preferences.endAgeRange)
-                Log.d("MyTag", "${ageRange.first} ${ageRange.second}")
             },
             onFailure = { error ->
                 Log.d("MyTag", error)

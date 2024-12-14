@@ -45,7 +45,9 @@ import com.example.datingapp.ui.theme.LikePink
 import com.example.datingapp.ui.theme.LikePinkAlpha
 import com.example.datingapp.ui.theme.MediumGray
 import com.example.datingapp.ui.utils.calculateAge
+import com.example.datingapp.viewmodel.ChatViewModel
 import com.example.datingapp.viewmodel.LikeViewModel
+import com.example.datingapp.viewmodel.MatchViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 import com.google.accompanist.pager.VerticalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -55,7 +57,10 @@ fun VerticalSwipeFeed(
     items: List<UserEntity>,
     photoViewModel: PhotoViewModel,
     likeViewModel: LikeViewModel,
-    currentUserId: String
+    matchViewModel: MatchViewModel,
+    chatViewModel: ChatViewModel,
+    currentUserId: String,
+    onMatch: (String) -> Unit
 ) {
     val pagerState = rememberPagerState()
     val itemCount = items.size
@@ -110,15 +115,35 @@ fun VerticalSwipeFeed(
                                     dragOffset = 300f
 
                                     likeViewModel.saveLikeToFirestore(
-                                        LikeEntity(
-                                            currentUserId,
-                                            user.uid
-                                        ),
+                                        LikeEntity(currentUserId, user.uid),
                                         onSuccess = {
-                                            Log.d("MyTag", "Like saved successfully")
+                                            matchViewModel.checkForMatchAndCreate(
+                                                currentUserId = currentUserId,
+                                                likedUserId = user.uid,
+                                                onMatchFound = {
+                                                    onMatch("${user.uid}")
+                                                },
+                                                onSuccess = {
+                                                    Log.d("MyTag", "Like and match processed")
+                                                    chatViewModel.createChat(
+                                                        currentUserId,
+                                                        user.uid,
+                                                        onSuccess = {
+                                                            Log.d("MyTag", "Chat created!")
+                                                        },
+                                                        onFailure = { error ->
+                                                            Log.d("MyTag", error)
+                                                        }
+                                                    )
+
+                                                },
+                                                onFailure = { error ->
+                                                    Log.e("MyTag", "Match creation failed: $error")
+                                                }
+                                            )
                                         },
                                         onFailure = { error ->
-                                            Log.d("MyTag", error)
+                                            Log.d("MyTag", "Like save error: $error")
                                         }
                                     )
                                 }
@@ -213,4 +238,5 @@ fun VerticalSwipeFeed(
             }
         }
     }
+
 }

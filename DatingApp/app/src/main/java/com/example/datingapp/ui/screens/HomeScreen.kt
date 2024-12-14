@@ -25,16 +25,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.datingapp.R
 import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.components.FiltersDialog
 import com.example.datingapp.ui.components.HomeHeaderSection
 import com.example.datingapp.ui.components.LoadingState
+import com.example.datingapp.ui.components.MatchDialog
 import com.example.datingapp.ui.theme.MediumPink
+import com.example.datingapp.viewmodel.ChatViewModel
 import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.LikeViewModel
+import com.example.datingapp.viewmodel.MatchViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 import com.example.datingapp.viewmodel.PreferencesViewModel
+import com.example.datingapp.viewmodel.StatusViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -47,6 +52,8 @@ fun HomeScreen(
     preferencesViewModel: PreferencesViewModel,
     genderViewModel: GenderViewModel,
     likeViewModel: LikeViewModel,
+    matchViewModel: MatchViewModel,
+    chatViewModel: ChatViewModel,
     currentUserId: String
 ) {
     val usersList = remember { mutableStateOf<List<UserEntity>>(emptyList()) }
@@ -55,6 +62,9 @@ fun HomeScreen(
 
     var genderIdPreference by remember { mutableStateOf("") }
     var ageRangePreference by remember { mutableStateOf(0 to 100) }
+
+    val showMatchDialog = remember { mutableStateOf(false) }
+    val matchedUserId = remember { mutableStateOf("") }
 
 
     LaunchedEffect(Unit, genderIdPreference, ageRangePreference) {
@@ -111,8 +121,15 @@ fun HomeScreen(
                             items = usersList.value.map { it },
                             photoViewModel = photoViewModel,
                             likeViewModel = likeViewModel,
+                            matchViewModel = matchViewModel,
+                            chatViewModel = chatViewModel,
                             currentUserId = currentUserId,
+                            onMatch = { id ->
+                                matchedUserId.value = id
+                                showMatchDialog.value = true
+                            }
                         )
+
                     } else {
                         Text("No users available")
                     }
@@ -127,13 +144,21 @@ fun HomeScreen(
             onDialogChange = { isFilterMenuVisible.value = it },
             onGenderChange = { newGenderId ->
                 genderIdPreference = newGenderId
-                Log.d("MyTag", "Updated Gender: $newGenderId")
             },
             onAgeRangeChange = { newAgeRange ->
                 ageRangePreference = newAgeRange
-                Log.d("MyTag", "Updated Age Range: ${newAgeRange.first}, ${newAgeRange.second}")
             }
         )
+        if (showMatchDialog.value) {
+            MatchDialog(
+                currentUserId = currentUserId,
+                likedUserId = matchedUserId.value,
+                onDismiss = { showMatchDialog.value = false },
+                photoViewModel = photoViewModel,
+                profileViewModel = profileViewModel
+            )
+        }
+
 
     }
 }
