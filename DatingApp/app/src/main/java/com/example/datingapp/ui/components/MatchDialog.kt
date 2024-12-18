@@ -57,7 +57,6 @@ fun MatchDialog(
     val likedUser = remember { mutableStateOf(UserEntity()) }
 
     LaunchedEffect(currentUserId, likedUserId) {
-        // Получаем фотографии пользователей
         photoViewModel.getPhotoBitmap(
             idUser = currentUserId,
             onSuccess = { bitmap ->
@@ -124,7 +123,6 @@ fun MatchDialog(
                 )
                 Spacer(modifier = Modifier.height(25.dp))
 
-                // Отображение фотографий пользователей
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically

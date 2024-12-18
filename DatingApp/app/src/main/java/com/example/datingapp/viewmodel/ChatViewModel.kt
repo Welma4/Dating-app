@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.datingapp.data.ChatEntity
+import com.example.datingapp.ui.utils.getCurrentTime
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
 
@@ -34,7 +35,7 @@ class ChatViewModel : ViewModel() {
                         "idFirstUser" to firstUserId,
                         "idSecondUser" to secondUserId,
                         "lastMessageId" to "",
-                        "lastUpdateTime" to System.currentTimeMillis()
+                        "lastUpdateTime" to getCurrentTime()
                     )
                     chatCol
                         .add(chatData)
@@ -57,25 +58,30 @@ class ChatViewModel : ViewModel() {
         onFailure: (String) -> Unit
     ) {
         val chatCol = db.collection("chat")
-        chatCol
-            .whereEqualTo("idFirstUser", userId)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                if (!querySnapshot.isEmpty) {
-                    val chats = querySnapshot.mapNotNull { document ->
-                        document.toObject<ChatEntity>()
+        val firstUserQuery = chatCol.whereEqualTo("idFirstUser", userId)
+        val secondUserQuery = chatCol.whereEqualTo("idSecondUser", userId)
+
+        firstUserQuery.get()
+            .addOnSuccessListener { firstUserSnapshot ->
+                secondUserQuery.get()
+                    .addOnSuccessListener { secondUserSnapshot ->
+                        val firstUserChats = firstUserSnapshot.documents.mapNotNull { it.toObject<ChatEntity>() }
+                        val secondUserChats = secondUserSnapshot.documents.mapNotNull { it.toObject<ChatEntity>() }
+
+                        // Объединяем и убираем дубликаты (если такие есть)
+                        val allChats = (firstUserChats + secondUserChats).distinctBy { it.hashCode() }
+
+                        _chatList.value = allChats.sortedByDescending { it.lastUpdateTime } // Сортировка по времени обновления
+                        onSuccess()
                     }
-                    Log.d("MyTag", "Fetched chats: ${chats.size}")
-                    _chatList.value = chats
-                    onSuccess()
-                } else {
-                    Log.d("MyTag", "No chats found")
-                    _chatList.value = emptyList()
-                }
+                    .addOnFailureListener { error ->
+                        onFailure(error.message ?: "Error fetching second user chats")
+                    }
             }
-            .addOnFailureListener { e ->
-                onFailure(e.message ?: "Error fetching chats")
+            .addOnFailureListener { error ->
+                onFailure(error.message ?: "Error fetching first user chats")
             }
     }
+
 
 }

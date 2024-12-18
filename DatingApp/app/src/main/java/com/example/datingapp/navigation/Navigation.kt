@@ -124,6 +124,8 @@ fun DatingApp() {
             MessagesScreen(
                 navController,
                 chatViewModel,
+                profileViewModel,
+                photoViewModel,
                 currentUserId
             )
         }
