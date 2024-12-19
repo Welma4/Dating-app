@@ -4,7 +4,12 @@ import androidx.compose.runtime.Composable
 import ProfileViewModel
 import SignUpScreen
 import android.util.Log
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,6 +30,7 @@ import com.example.datingapp.viewmodel.MatchViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 import com.example.datingapp.viewmodel.PreferencesViewModel
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
 @Composable
@@ -42,9 +48,17 @@ fun DatingApp() {
     val chatViewModel: ChatViewModel = viewModel()
     val auth = Firebase.auth
 
-    var currentUserId = auth.currentUser?.uid ?: ""
-    LaunchedEffect(Unit) {
-        currentUserId = auth.currentUser?.uid ?: ""
+    var currentUserId by remember { mutableStateOf(auth.currentUser?.uid ?: "")  }
+    DisposableEffect(Unit) {
+        val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            currentUserId = firebaseAuth.currentUser?.uid ?: ""
+            Log.d("MyTag", "Updated currentUserId: $currentUserId")
+        }
+        auth.addAuthStateListener(authStateListener)
+
+        onDispose {
+            auth.removeAuthStateListener(authStateListener)
+        }
     }
 
     NavHost(navController, startDestination = if (auth.currentUser != null) Routes.Home else Routes.Login) {
