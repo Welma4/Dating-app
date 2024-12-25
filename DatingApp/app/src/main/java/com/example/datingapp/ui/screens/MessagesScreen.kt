@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -148,7 +149,7 @@ fun MessagesScreen(
                 }
             } else {
                 if (chatList.value.isNotEmpty()) {
-                    ChatList(chatList.value, currentUserId, userNameMap, userPhotoMap)
+                    ChatList(navController, chatList.value, currentUserId, userNameMap, userPhotoMap)
                 } else {
                     Text("No chats available.", modifier = Modifier.padding(16.dp))
                 }
@@ -159,6 +160,7 @@ fun MessagesScreen(
 
 @Composable
 fun ChatList(
+    navController: NavController,
     chatList: List<ChatEntity>,
     currentUserId: String,
     userNameMap: Map<String, String>,
@@ -169,20 +171,20 @@ fun ChatList(
         contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         items(chatList) { chat ->
-            ChatItem(chat, currentUserId, userNameMap, userPhotoMap)
+            ChatItem(navController, chat, currentUserId, userNameMap, userPhotoMap)
         }
     }
 }
 
 @Composable
 fun ChatItem(
+    navController: NavController,
     chat: ChatEntity,
     currentUserId: String,
     userNameMap: Map<String, String>,
     userPhotoMap: Map<String, Bitmap?>
 ) {
-    val userIdToShow =
-        if (chat.idFirstUser == currentUserId) chat.idSecondUser else chat.idFirstUser
+    val userIdToShow = if (chat.idFirstUser == currentUserId) chat.idSecondUser else chat.idFirstUser
     val userName = userNameMap[userIdToShow] ?: "Loading..."
     val userPhoto = userPhotoMap[userIdToShow]
 
@@ -190,7 +192,8 @@ fun ChatItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .height(65.dp),
+            .height(65.dp)
+            .clickable { navController.navigate("Chat/${userIdToShow}") },
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Row(

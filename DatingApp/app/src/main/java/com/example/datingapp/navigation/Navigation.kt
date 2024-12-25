@@ -11,10 +11,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.datingapp.data.Routes
+import com.example.datingapp.ui.screens.ChatScreen
 import com.example.datingapp.ui.screens.EditProfileScreen
 import com.example.datingapp.ui.screens.HomeScreen
 import com.example.datingapp.ui.screens.LikeScreen
@@ -141,6 +144,21 @@ fun DatingApp() {
                 profileViewModel,
                 photoViewModel,
                 currentUserId
+            )
+        }
+
+        composable(
+            Routes.Chat,
+            arguments = listOf(navArgument("chatId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
+            ChatScreen(
+                interlocutorId = chatId,
+                navController = navController,
+                chatViewModel = chatViewModel,
+                profileViewModel = profileViewModel,
+                photoViewModel = photoViewModel,
+                currentUserId = currentUserId
             )
         }
 

@@ -68,10 +68,9 @@ class ChatViewModel : ViewModel() {
                         val firstUserChats = firstUserSnapshot.documents.mapNotNull { it.toObject<ChatEntity>() }
                         val secondUserChats = secondUserSnapshot.documents.mapNotNull { it.toObject<ChatEntity>() }
 
-                        // Объединяем и убираем дубликаты (если такие есть)
                         val allChats = (firstUserChats + secondUserChats).distinctBy { it.hashCode() }
 
-                        _chatList.value = allChats.sortedByDescending { it.lastUpdateTime } // Сортировка по времени обновления
+                        _chatList.value = allChats.sortedByDescending { it.lastUpdateTime }
                         onSuccess()
                     }
                     .addOnFailureListener { error ->
