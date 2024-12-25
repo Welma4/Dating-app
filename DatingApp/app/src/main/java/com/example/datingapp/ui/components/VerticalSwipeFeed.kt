@@ -74,7 +74,7 @@ fun VerticalSwipeFeed(
                     photoBitmaps.value = photoBitmaps.value + (user.uid to bitmap)
                 },
                 onFailure = { error ->
-                    Log.e("VerticalSwipeFeed", "Error loading photo for user ${user.uid}: $error")
+                    Log.e("MyTag", "Error loading photo for user ${user.uid}: $error")
                 }
             )
         }

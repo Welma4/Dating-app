@@ -60,7 +60,7 @@ class MatchViewModel : ViewModel() {
                                     onFailure(error.message ?: "Error checking for mutual like")
                                 }
                         } else {
-                            Log.d("MyTag", "Match уже существует между пользователями")
+                            Log.d("MyTag", "Match already exists")
                             onSuccess()
                         }
                     }

@@ -10,4 +10,5 @@ object Routes {
     const val Likes = "LikesScreen"
     const val Messages = "MessagesScreen"
     const val PhotoRequest = "PhotoRequestScreen"
+    const val Chat = "Chat/{chatId}"
 }
