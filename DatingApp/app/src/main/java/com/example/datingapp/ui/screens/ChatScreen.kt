@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,11 +18,15 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -48,9 +53,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.text.TextStyle
+import com.example.datingapp.data.MessageEntity
 import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.theme.GrayBlue
 import com.example.datingapp.ui.theme.MediumPink
+import com.example.datingapp.viewmodel.MessageViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 
 
@@ -62,11 +69,14 @@ fun ChatScreen(
     chatViewModel: ChatViewModel,
     profileViewModel: ProfileViewModel,
     photoViewModel: PhotoViewModel,
+    messageViewModel: MessageViewModel,
     currentUserId: String
 ) {
     var text by remember { mutableStateOf("") }
     val interlocutor = remember { mutableStateOf(UserEntity()) }
     val interlocutorPhoto = remember { mutableStateOf<Bitmap?>(null) }
+    var currentChatId by remember { mutableStateOf("") }
+    var messages by remember { mutableStateOf<List<MessageEntity>>(emptyList()) }
 
     LaunchedEffect(Unit) {
         photoViewModel.getPhotoBitmap(
@@ -78,6 +88,7 @@ fun ChatScreen(
                 Log.d("MyTag", "Error loading interlocutor photo: $error")
             }
         )
+
         profileViewModel.fetchUserFromFirestore(
             interlocutorId,
             onSuccess = { user ->
@@ -87,7 +98,28 @@ fun ChatScreen(
                 Log.d("MyTag", error)
             }
         )
+
+        chatViewModel.fetchChatId(
+            currentUserId,
+            interlocutorId,
+            onSuccess = { id ->
+                currentChatId = id
+                messageViewModel.fetchMessagesForChatRealtime(
+                    currentChatId,
+                    onSuccess = { result ->
+                        messages = result
+                    },
+                    onFailure = { error ->
+                        Log.d("MyTag", error)
+                    }
+                )
+            },
+            onFailure = { error ->
+                Log.d("MyTag", error)
+            }
+        )
     }
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize().imePadding(),
@@ -140,7 +172,9 @@ fun ChatScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp)
                     ) {
-
+                        items(messages) { message ->
+                            MessageCard(message, if (message.idUser == currentUserId) true else false)
+                        }
                     }
                 }
 
@@ -179,7 +213,20 @@ fun ChatScreen(
                         modifier = Modifier
                             .height(52.dp)
                             .clip(shape = RoundedCornerShape(24.dp)),
-                        onClick = { /* Логика отправки сообщения */ },
+                        onClick = {
+                            messageViewModel.saveMessageToFirestore(
+                                currentUserId,
+                                currentChatId,
+                                text,
+                                onSuccess = {
+                                    text = ""
+                                    Log.d("MyTag", "Message sent successfully")
+                                },
+                                onFailure = { error ->
+                                    Log.d("MyTag", error)
+                                }
+                            )
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = if (text.isEmpty()) GrayBlue else MediumPink),
                     ) {
                         Text(
@@ -192,4 +239,34 @@ fun ChatScreen(
             }
         }
     )
+}
+
+@Composable
+fun MessageCard(
+    message: MessageEntity,
+    isFromCurrent: Boolean
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp, vertical = 12.dp)
+    ) {
+        Card(
+            modifier = Modifier
+                .align( if (isFromCurrent) Alignment.CenterEnd else Alignment.CenterStart)
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = if (isFromCurrent) MediumPink else GrayBlue
+            )
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 15.dp, vertical = 10.dp),
+                text = message.messageText,
+                fontSize = 14.sp,
+                color = if (isFromCurrent) Color.White else Color.Black
+            )
+        }
+    }
 }

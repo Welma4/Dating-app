@@ -30,6 +30,7 @@ import com.example.datingapp.viewmodel.ChatViewModel
 import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.LikeViewModel
 import com.example.datingapp.viewmodel.MatchViewModel
+import com.example.datingapp.viewmodel.MessageViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 import com.example.datingapp.viewmodel.PreferencesViewModel
 import com.google.firebase.Firebase
@@ -49,6 +50,7 @@ fun DatingApp() {
     val likeViewModel: LikeViewModel = viewModel()
     val matchViewModel: MatchViewModel = viewModel()
     val chatViewModel: ChatViewModel = viewModel()
+    val messageViewModel: MessageViewModel = viewModel()
     val auth = Firebase.auth
 
     var currentUserId by remember { mutableStateOf(auth.currentUser?.uid ?: "")  }
@@ -158,6 +160,7 @@ fun DatingApp() {
                 chatViewModel = chatViewModel,
                 profileViewModel = profileViewModel,
                 photoViewModel = photoViewModel,
+                messageViewModel = messageViewModel,
                 currentUserId = currentUserId
             )
         }

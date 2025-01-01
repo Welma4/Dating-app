@@ -158,8 +158,6 @@ fun HomeScreen(
                 profileViewModel = profileViewModel
             )
         }
-
-
     }
 }
 
