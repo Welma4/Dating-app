@@ -15,7 +15,7 @@ class ChatViewModel : ViewModel() {
 
     private val _chatList = MutableLiveData<List<ChatEntity>>()
     val chatList: LiveData<List<ChatEntity>> get() = _chatList
-
+    private val chatCol = db.collection("chat")
 
     fun createChat(
         firstUserId: String,
@@ -23,7 +23,6 @@ class ChatViewModel : ViewModel() {
         onSuccess: () -> Unit,
         onFailure: (String) -> Unit
     ) {
-        val chatCol = db.collection("chat")
 
         chatCol
             .whereIn("idFirstUser", listOf(firstUserId, secondUserId))
@@ -46,9 +45,35 @@ class ChatViewModel : ViewModel() {
                             onFailure(e.message ?: "Error adding new chat")
                         }
                 }
+                else {
+                    onFailure("Chat already exists")
+                }
             }
             .addOnFailureListener { e ->
                 onFailure(e.message ?: "Error checking existing chat")
+            }
+    }
+
+    fun fetchChatId(
+        firstUserId: String,
+        secondUserId: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        chatCol
+            .whereIn("idFirstUser", listOf(firstUserId, secondUserId))
+            .whereIn("idSecondUser", listOf(firstUserId, secondUserId))
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    val document = querySnapshot.documents.first()
+                    onSuccess(document.id)
+                } else {
+                    onFailure("Chat for ${firstUserId} and ${secondUserId} was not found")
+                }
+            }
+            .addOnFailureListener { error ->
+                onFailure(error.message ?: "Error finding chat")
             }
     }
 
@@ -57,7 +82,6 @@ class ChatViewModel : ViewModel() {
         onSuccess: () -> Unit,
         onFailure: (String) -> Unit
     ) {
-        val chatCol = db.collection("chat")
         val firstUserQuery = chatCol.whereEqualTo("idFirstUser", userId)
         val secondUserQuery = chatCol.whereEqualTo("idSecondUser", userId)
 
