@@ -106,5 +106,36 @@ class ChatViewModel : ViewModel() {
             }
     }
 
+    fun updateChat(
+        chatId: String,
+        lastMessageId: String,
+        lastMessageTime: String,
+        onSuccess: () -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val docRef = chatCol.document(chatId)
 
+        docRef
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (querySnapshot.exists()) {
+                    val updatedFields = hashMapOf<String, Any>(
+                        "lastMessageId" to lastMessageId,
+                        "lastUpdateTime" to lastMessageTime
+                    )
+                    docRef.update(updatedFields)
+                        .addOnSuccessListener {
+                            onSuccess()
+                        }
+                        .addOnFailureListener {
+                                error ->
+                            onFailure(error.message ?: "Error fetching first user chats")
+                        }
+                }
+            }
+            .addOnFailureListener {
+                    error ->
+                onFailure(error.message ?: "Error fetching first user chats")
+            }
+    }
 }

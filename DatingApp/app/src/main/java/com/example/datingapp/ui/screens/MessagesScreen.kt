@@ -43,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.example.datingapp.R
 import com.example.datingapp.ui.theme.MediumPink
+import com.example.datingapp.ui.utils.formatTime
 import com.example.datingapp.viewmodel.PhotoViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -247,7 +248,7 @@ fun ChatItem(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = chat.lastUpdateTime,
+                        text = formatTime(chat.lastUpdateTime),
                         color = Color.Gray,
                         fontSize = 12.sp
                     )

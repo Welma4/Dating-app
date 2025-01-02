@@ -19,8 +19,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -57,6 +59,8 @@ import com.example.datingapp.data.MessageEntity
 import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.theme.GrayBlue
 import com.example.datingapp.ui.theme.MediumPink
+import com.example.datingapp.ui.utils.formatTime
+import com.example.datingapp.ui.utils.getCurrentDateTime
 import com.example.datingapp.viewmodel.MessageViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 
@@ -124,7 +128,11 @@ fun ChatScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize().imePadding(),
         content = {
-            Box(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+            ) {
                 Column(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -166,16 +174,26 @@ fun ChatScreen(
 
                     }
 
+                    val listState = rememberLazyListState()
+
+                    LaunchedEffect(messages) {
+                        if (messages.isNotEmpty()) {
+                            listState.scrollToItem(messages.size - 1)
+                        }
+                    }
+
                     LazyColumn(
+                        state = listState,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp)
+                            .padding(start = 20.dp, end = 20.dp, bottom = 80.dp, top = 0.dp)
                     ) {
                         items(messages) { message ->
                             MessageCard(message, if (message.idUser == currentUserId) true else false)
                         }
                     }
+
                 }
 
                 Row(
@@ -214,18 +232,31 @@ fun ChatScreen(
                             .height(52.dp)
                             .clip(shape = RoundedCornerShape(24.dp)),
                         onClick = {
-                            messageViewModel.saveMessageToFirestore(
-                                currentUserId,
-                                currentChatId,
-                                text,
-                                onSuccess = {
-                                    text = ""
-                                    Log.d("MyTag", "Message sent successfully")
-                                },
-                                onFailure = { error ->
-                                    Log.d("MyTag", error)
-                                }
-                            )
+                            if (text.isNotBlank()) {
+                                messageViewModel.saveMessageToFirestore(
+                                    currentUserId,
+                                    currentChatId,
+                                    text,
+                                    onSuccess = {
+                                        Log.d("MyTag", "Message sent successfully")
+                                        chatViewModel.updateChat(
+                                            currentChatId,
+                                            text,
+                                            getCurrentDateTime(),
+                                            onSuccess = {
+                                                text = ""
+                                                Log.d("MyTag", "Chat updated successfully")
+                                            },
+                                            onFailure = { error ->
+                                                Log.d("MyTag", error)
+                                            }
+                                        )
+                                    },
+                                    onFailure = { error ->
+                                        Log.d("MyTag", error)
+                                    }
+                                )
+                            }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = if (text.isEmpty()) GrayBlue else MediumPink),
                     ) {
@@ -246,27 +277,53 @@ fun MessageCard(
     message: MessageEntity,
     isFromCurrent: Boolean
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 12.dp)
+            .padding(vertical = 8.dp),
+        horizontalArrangement = if (isFromCurrent) Arrangement.End else Arrangement.Start
     ) {
+        if (isFromCurrent) {
+            Text(
+                text = formatTime(message.sendTime),
+                fontSize = 12.sp,
+                color = Color.Gray,
+                modifier = Modifier
+                    .align(Alignment.Bottom)
+                    .padding(end = 8.dp)
+            )
+        }
+
         Card(
             modifier = Modifier
-                .align( if (isFromCurrent) Alignment.CenterEnd else Alignment.CenterStart)
+                .weight(1f, false)
                 .wrapContentHeight(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
                 containerColor = if (isFromCurrent) MediumPink else GrayBlue
             )
         ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
+            ) {
+                Text(
+                    text = message.messageText,
+                    fontSize = 14.sp,
+                    color = if (isFromCurrent) Color.White else Color.Black
+                )
+            }
+        }
+
+        if (!isFromCurrent) {
             Text(
+                text = formatTime(message.sendTime),
+                fontSize = 12.sp,
+                color = Color.Gray,
                 modifier = Modifier
-                    .padding(horizontal = 15.dp, vertical = 10.dp),
-                text = message.messageText,
-                fontSize = 14.sp,
-                color = if (isFromCurrent) Color.White else Color.Black
+                    .align(Alignment.Bottom)
+                    .padding(start = 8.dp)
             )
         }
     }
 }
+
