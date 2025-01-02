@@ -151,6 +151,7 @@ fun HomeScreen(
         )
         if (showMatchDialog.value) {
             MatchDialog(
+                navController = navController,
                 currentUserId = currentUserId,
                 likedUserId = matchedUserId.value,
                 onDismiss = { showMatchDialog.value = false },

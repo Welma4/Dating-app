@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.datingapp.R
 import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.theme.LikePink
@@ -46,6 +47,7 @@ import com.example.datingapp.viewmodel.PhotoViewModel
 
 @Composable
 fun MatchDialog(
+    navController: NavController,
     currentUserId: String,
     likedUserId: String,
     onDismiss: () -> Unit,
@@ -151,7 +153,7 @@ fun MatchDialog(
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Button(
-                        onClick = { /* Логика отправки сообщения */ },
+                        onClick = { navController.navigate("Chat/${likedUserId}") },
                         modifier = Modifier
                             .height(50.dp)
                             .fillMaxWidth(0.9f),

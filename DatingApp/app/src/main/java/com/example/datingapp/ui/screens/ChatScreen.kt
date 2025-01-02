@@ -29,6 +29,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -57,6 +58,7 @@ import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.text.TextStyle
 import com.example.datingapp.data.MessageEntity
 import com.example.datingapp.data.UserEntity
+import com.example.datingapp.ui.components.MessageCard
 import com.example.datingapp.ui.theme.GrayBlue
 import com.example.datingapp.ui.theme.MediumPink
 import com.example.datingapp.ui.utils.formatTime
@@ -81,15 +83,19 @@ fun ChatScreen(
     val interlocutorPhoto = remember { mutableStateOf<Bitmap?>(null) }
     var currentChatId by remember { mutableStateOf("") }
     var messages by remember { mutableStateOf<List<MessageEntity>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
+        isLoading = true
         photoViewModel.getPhotoBitmap(
             idUser = interlocutorId,
             onSuccess = { bitmap ->
                 interlocutorPhoto.value = bitmap
+                isLoading = false
             },
             onFailure = { error ->
                 Log.d("MyTag", "Error loading interlocutor photo: $error")
+                isLoading = false
             }
         )
 
@@ -97,9 +103,11 @@ fun ChatScreen(
             interlocutorId,
             onSuccess = { user ->
                 interlocutor.value = user
+                isLoading = false
             },
             onFailure = { error ->
                 Log.d("MyTag", error)
+                isLoading = false
             }
         )
 
@@ -112,21 +120,26 @@ fun ChatScreen(
                     currentChatId,
                     onSuccess = { result ->
                         messages = result
+                        isLoading = false
                     },
                     onFailure = { error ->
                         Log.d("MyTag", error)
+                        isLoading = false
                     }
                 )
             },
             onFailure = { error ->
                 Log.d("MyTag", error)
+                isLoading = false
             }
         )
     }
 
 
     Scaffold(
-        modifier = Modifier.fillMaxSize().imePadding(),
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding(),
         content = {
             Box(
                 modifier = Modifier
@@ -152,10 +165,15 @@ fun ChatScreen(
                                 modifier = Modifier.size(32.dp)
                             )
                         }
-                        Row(modifier = Modifier.align(Alignment.CenterStart).padding(start = 70.dp)) {
+                        Row(
+                            modifier = Modifier
+                                .align(Alignment.CenterStart)
+                                .padding(start = 70.dp)
+                        ) {
                             interlocutorPhoto.value?.let { bitmap ->
                                 Image(
-                                    bitmap = Bitmap.createScaledBitmap(bitmap, 45, 45, false).asImageBitmap(),
+                                    bitmap = Bitmap.createScaledBitmap(bitmap, 45, 45, false)
+                                        .asImageBitmap(),
                                     contentDescription = "likedUserPhoto",
                                     modifier = Modifier
                                         .size(45.dp)
@@ -167,7 +185,7 @@ fun ChatScreen(
                                 modifier = Modifier.align(Alignment.CenterVertically),
                                 text = interlocutor.value.firstName,
                                 fontSize = 22.sp,
-                                style = TextStyle(letterSpacing = 0.2.sp,),
+                                style = TextStyle(letterSpacing = 0.2.sp),
                                 fontWeight = FontWeight.Bold,
                             )
                         }
@@ -181,19 +199,42 @@ fun ChatScreen(
                             listState.scrollToItem(messages.size - 1)
                         }
                     }
-
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .padding(start = 20.dp, end = 20.dp, bottom = 80.dp, top = 0.dp)
-                    ) {
-                        items(messages) { message ->
-                            MessageCard(message, if (message.idUser == currentUserId) true else false)
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(200.dp),
+                                color = MediumPink
+                            )
+                        }
+                    } else if (messages.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(vertical = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "There are no messages here yet. Write first!",
+                                color = Color.Gray,
+                                fontSize = 16.sp
+                            )
+                        }
+                    } else {
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .padding(start = 20.dp, end = 20.dp, bottom = 80.dp, top = 0.dp)
+                        ) {
+                            items(messages) { message ->
+                                MessageCard(message, message.idUser == currentUserId)
+                            }
                         }
                     }
-
                 }
 
                 Row(
@@ -272,58 +313,4 @@ fun ChatScreen(
     )
 }
 
-@Composable
-fun MessageCard(
-    message: MessageEntity,
-    isFromCurrent: Boolean
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = if (isFromCurrent) Arrangement.End else Arrangement.Start
-    ) {
-        if (isFromCurrent) {
-            Text(
-                text = formatTime(message.sendTime),
-                fontSize = 12.sp,
-                color = Color.Gray,
-                modifier = Modifier
-                    .align(Alignment.Bottom)
-                    .padding(end = 8.dp)
-            )
-        }
-
-        Card(
-            modifier = Modifier
-                .weight(1f, false)
-                .wrapContentHeight(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isFromCurrent) MediumPink else GrayBlue
-            )
-        ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
-            ) {
-                Text(
-                    text = message.messageText,
-                    fontSize = 14.sp,
-                    color = if (isFromCurrent) Color.White else Color.Black
-                )
-            }
-        }
-
-        if (!isFromCurrent) {
-            Text(
-                text = formatTime(message.sendTime),
-                fontSize = 12.sp,
-                color = Color.Gray,
-                modifier = Modifier
-                    .align(Alignment.Bottom)
-                    .padding(start = 8.dp)
-            )
-        }
-    }
-}
 
