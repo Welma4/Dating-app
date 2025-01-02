@@ -34,26 +34,6 @@ class MessageViewModel : ViewModel() {
             }
     }
 
-    fun fetchMessagesForChat(
-        idChat: String,
-        onSuccess: (List<MessageEntity>) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        messageCol
-            .whereEqualTo("idChat", idChat)
-            .orderBy("sendTime")
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                val messages = querySnapshot.documents.mapNotNull { document ->
-                    document.toObject(MessageEntity::class.java)
-                }
-                onSuccess(messages)
-            }
-            .addOnFailureListener { error ->
-                onFailure(("FETCH MES " + error.message) ?: "Error fetching messages")
-            }
-    }
-
     fun fetchMessagesForChatRealtime(
         chatId: String,
         onSuccess: (List<MessageEntity>) -> Unit,
@@ -71,6 +51,29 @@ class MessageViewModel : ViewModel() {
                     val messages = snapshots.documents.mapNotNull { it.toObject(MessageEntity::class.java) }
                     onSuccess(messages)
                 }
+            }
+    }
+
+    fun fetchMessageById(
+        messageId: String,
+        onSuccess: (MessageEntity) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        messageCol
+            .document(messageId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (querySnapshot.exists()) {
+                    val message = querySnapshot.toObject(MessageEntity::class.java)
+                    if (message != null) {
+                        onSuccess(message)
+                    } else {
+                        onFailure("Message is null")
+                    }
+                }
+            }
+            .addOnFailureListener { error ->
+                onFailure(error.message ?: "Error finding message document")
             }
     }
 }
