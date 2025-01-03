@@ -36,8 +36,8 @@ class MatchViewModel : ViewModel() {
                                 .whereEqualTo("idUser", likedUserId)
                                 .whereEqualTo("idLikedUser", currentUserId)
                                 .get()
-                                .addOnSuccessListener { querySnapshot ->
-                                    if (!querySnapshot.isEmpty) {
+                                .addOnSuccessListener { mutualLikeSnapshot ->
+                                    if (!mutualLikeSnapshot.isEmpty) {
                                         val matchData = hashMapOf(
                                             "idFirstUser" to currentUserId,
                                             "idSecondUser" to likedUserId,

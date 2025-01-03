@@ -97,7 +97,7 @@ fun VerticalSwipeFeed(
 
         val filterAlpha by animateFloatAsState(
             targetValue = if (hasLiked) 0.3f else (dragOffset / 300f).coerceIn(0f, 0.3f),
-            animationSpec = tween(durationMillis = 200)
+            animationSpec = tween(durationMillis = 100)
         )
         val showHeartIcon = filterAlpha >= 0.3f
 
@@ -122,9 +122,6 @@ fun VerticalSwipeFeed(
                                                 likedUserId = user.uid,
                                                 onMatchFound = {
                                                     onMatch("${user.uid}")
-                                                },
-                                                onSuccess = {
-                                                    Log.d("MyTag", "Like and match processed")
                                                     chatViewModel.createChat(
                                                         currentUserId,
                                                         user.uid,
@@ -135,7 +132,9 @@ fun VerticalSwipeFeed(
                                                             Log.d("MyTag", error)
                                                         }
                                                     )
-
+                                                },
+                                                onSuccess = {
+                                                    Log.d("MyTag", "Like and match processed")
                                                 },
                                                 onFailure = { error ->
                                                     Log.e("MyTag", "Match creation failed: $error")
