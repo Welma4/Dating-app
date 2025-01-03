@@ -135,7 +135,9 @@ fun DatingApp() {
                 currentUserId,
                 profileViewModel,
                 likeViewModel,
-                photoViewModel
+                photoViewModel,
+                matchViewModel,
+                chatViewModel
             )
         }
 

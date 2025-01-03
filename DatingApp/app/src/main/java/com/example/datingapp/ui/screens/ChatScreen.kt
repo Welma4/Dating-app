@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.text.TextStyle
 import com.example.datingapp.data.MessageEntity
+import com.example.datingapp.data.Routes
 import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.components.MessageCard
 import com.example.datingapp.ui.theme.GrayBlue
@@ -155,7 +156,7 @@ fun ChatScreen(
                             .padding(start = 0.dp, end = 0.dp, top = 24.dp, bottom = 8.dp)
                     ) {
                         IconButton(
-                            onClick = { navController.popBackStack() },
+                            onClick = { navController.navigate(Routes.Messages) },
                             modifier = Modifier.align(Alignment.CenterStart)
                         ) {
                             Icon(
