@@ -85,11 +85,20 @@ fun LikeScreen(
     val showMatchDialog = remember { mutableStateOf(false) }
     val matchedUserId = remember { mutableStateOf("") }
 
+    val likedUsersMessage = remember { mutableStateOf("") }
+    val usersWhoLikedMessage = remember { mutableStateOf("") }
+
     fun loadLikedUsers() {
         isLoading.value = true
+        likedUsersMessage.value = ""
         likeViewModel.fetchLikedUsers(
             currentUserId,
             onSuccess = { likedUserIds ->
+                if (likedUserIds.isEmpty()) {
+                    likedUsersMessage.value = "You haven't liked anyone yet."
+                    isLoading.value = false
+                    return@fetchLikedUsers
+                }
                 val userPhotos = mutableListOf<Pair<UserEntity, Bitmap?>>()
                 val remainingIds = likedUserIds.toMutableList()
                 likedUserIds.forEach { userId ->
@@ -103,16 +112,16 @@ fun LikeScreen(
                                     remainingIds.remove(userId)
                                     if (remainingIds.isEmpty()) {
                                         likedUsers.value = userPhotos
-                                        isLoading.value = false
                                     }
+                                    isLoading.value = false
                                 },
                                 onFailure = {
                                     userPhotos.add(user to null)
                                     remainingIds.remove(userId)
                                     if (remainingIds.isEmpty()) {
                                         likedUsers.value = userPhotos
-                                        isLoading.value = false
                                     }
+                                    isLoading.value = false
                                 }
                             )
                         },
@@ -127,15 +136,22 @@ fun LikeScreen(
             },
             onFailure = {
                 isLoading.value = false
+                likedUsersMessage.value = "Failed to load liked users."
             }
         )
     }
 
     fun loadUsersWhoLiked() {
         isLoading.value = true
+        usersWhoLikedMessage.value = ""
         likeViewModel.fetchUsersWhoLikedCurrent(
             currentUserId,
             onSuccess = { userWhoLikedIds ->
+                if (userWhoLikedIds.isEmpty()) {
+                    usersWhoLikedMessage.value = "No one has liked you yet."
+                    isLoading.value = false
+                    return@fetchUsersWhoLikedCurrent
+                }
                 val userPhotos = mutableListOf<Pair<UserEntity, Bitmap?>>()
                 val remainingIds = userWhoLikedIds.toMutableList()
                 userWhoLikedIds.forEach { userId ->
@@ -173,9 +189,11 @@ fun LikeScreen(
             },
             onFailure = {
                 isLoading.value = false
+                usersWhoLikedMessage.value = "Failed to load users who liked you."
             }
         )
     }
+
 
     LaunchedEffect(Unit) {
         loadLikedUsers()
@@ -235,18 +253,45 @@ fun LikeScreen(
                         color = MediumPink
                     )
                 }
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.fillMaxSize().padding(bottom = 55.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    if (isShowingLikedUsers.value) {
+            } else if (isShowingLikedUsers.value) {
+                if (likedUsers.value.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = likedUsersMessage.value,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center,
+                            color = MediumGray
+                        )
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.fillMaxSize().padding(bottom = 55.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
                         itemsIndexed(likedUsers.value) { _, (user, photo) ->
                             UserYouLikeCard(user = user, photo = photo)
                         }
-                    } else {
+                    }
+                }
+            } else {
+                if (usersWhoLiked.value.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = usersWhoLikedMessage.value,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center,
+                            color = MediumGray
+                        )
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.fillMaxSize().padding(bottom = 55.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
                         itemsIndexed(usersWhoLiked.value) { _, (user, photo) ->
                             UserLikesYouCard(
                                 user = user,
