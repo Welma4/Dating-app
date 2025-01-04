@@ -47,7 +47,7 @@ class LikeViewModel : ViewModel() {
                 val likedUsers = querySnapshot.documents.mapNotNull { document ->
                     document.getString("idLikedUser")
                 }
-                onSuccess(likedUsers)
+                onSuccess(likedUsers.ifEmpty { emptyList() })
             }
             .addOnFailureListener { error ->
                 onFailure(error.message ?: "Error fetching liked users")
@@ -66,11 +66,10 @@ class LikeViewModel : ViewModel() {
                 val likedUsers = querySnapshot.documents.mapNotNull { document ->
                     document.getString("idUser")
                 }
-                onSuccess(likedUsers)
+                onSuccess(likedUsers.ifEmpty { emptyList() })
             }
             .addOnFailureListener { error ->
                 onFailure(error.message ?: "Error fetching liked users")
             }
     }
-
 }

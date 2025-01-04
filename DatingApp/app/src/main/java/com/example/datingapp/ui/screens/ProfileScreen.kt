@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +24,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +37,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.example.datingapp.R
 import com.example.datingapp.data.Routes
@@ -64,11 +72,18 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import coil.compose.rememberAsyncImagePainter
 import com.example.datingapp.ui.components.ProfileField
+import com.example.datingapp.ui.theme.MediumPink
 import com.example.datingapp.ui.utils.imageToBase64
 import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
+import com.google.firebase.auth.EmailAuthCredential
+import com.google.firebase.auth.EmailAuthProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ProfileScreen(
@@ -112,6 +127,8 @@ fun ProfileScreen(
         selectedImageUri = uri
         isImageLoaded = (uri != null)
     }
+
+    var showDeleteAccountAlert by remember { mutableStateOf(false) }
 
     LaunchedEffect(isImageLoaded) {
         if (isImageLoaded) {
@@ -165,6 +182,7 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFFB09DFF))
+                .verticalScroll(rememberScrollState())
         ) {
             Box(
                 modifier = Modifier
@@ -282,15 +300,139 @@ fun ProfileScreen(
                         color = Color.White
                     )
                 }
+                Button(
+                    onClick = { 
+                        showDeleteAccountAlert = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(65.dp)
+                        .padding(bottom = 10.dp)
+                        .border(shape = RoundedCornerShape(32.dp), color = Color.Gray, width = 1.dp)
+                ) {
+                    Text(
+                        text = "DELETE ACCOUNT",
+                        fontFamily = poppinsFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 16.sp,
+                        color = Color.Red
+                    )
+                }
+                Spacer(modifier = Modifier.height(70.dp))
+            }
+            if (showDeleteAccountAlert) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteAccountAlert = false },
+                    properties = DialogProperties(dismissOnClickOutside = true)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(color = Color.White, shape = RoundedCornerShape(32.dp))
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Are you sure you want to delete your account?",
+                            fontSize = 16.sp,
+                            color = Color.Black
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Button(
+                                onClick = {
+                                    showDeleteAccountAlert = false
+                                    currentUser?.uid?.let { userId ->
+                                        CoroutineScope(Dispatchers.Main).launch {
+                                            try {
+                                                profileViewModel.deleteUser(
+                                                    userId,
+                                                    onSuccess = {
+                                                        deleteAccount(
+                                                            auth,
+                                                            user.emailAddress,
+                                                            user.password,
+                                                            onSuccess = {
+                                                                navController.navigate(Routes.Login)
+                                                            },
+                                                            onFailure = { error ->
+                                                                Log.d("MyTag", error)
+                                                            }
+                                                        )
+                                                    },
+                                                    onFailure = { e ->
+                                                        Log.e("DeleteAccount", "Error deleting account: $e")
+                                                    }
+                                                )
+                                            } catch (e: Exception) {
+                                                Log.e("DeleteAccount", "Coroutine exception: ${e.message}")
+                                            }
+                                        }
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = MediumPink),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "Confirm",
+                                    color = Color.White
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            Button(
+                                onClick = { showDeleteAccountAlert = false },
+                                colors = ButtonDefaults.buttonColors(containerColor = MediumPink),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "Cancel",
+                                    color = Color.White
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
 }
 
+
 private fun signOut(auth: FirebaseAuth) {
     auth.signOut()
 }
+
+private fun deleteAccount(
+    auth: FirebaseAuth,
+    email: String,
+    password: String,
+    onSuccess: () -> Unit,
+    onFailure: (String) -> Unit
+) {
+    val credential = EmailAuthProvider.getCredential(email, password)
+    auth.currentUser?.reauthenticate(credential)?.addOnCompleteListener {
+        if (it.isSuccessful) {
+            auth.currentUser?.delete()?.addOnCompleteListener {
+                if (it.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onFailure(it.exception?.message.toString())
+                }
+            }
+        } else {
+            onFailure(it.exception?.message.toString())
+        }
+    }
+}
+
 
 
 

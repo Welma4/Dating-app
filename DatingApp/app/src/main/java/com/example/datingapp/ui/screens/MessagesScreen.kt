@@ -42,6 +42,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.example.datingapp.R
+import com.example.datingapp.data.Routes
+import com.example.datingapp.ui.components.ChatList
 import com.example.datingapp.ui.theme.MediumPink
 import com.example.datingapp.ui.utils.formatTime
 import com.example.datingapp.viewmodel.PhotoViewModel
@@ -120,7 +122,7 @@ fun MessagesScreen(
                     .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 4.dp)
             ) {
                 IconButton(
-                    onClick = { navController.popBackStack() },
+                    onClick = { navController.navigate(Routes.Home) },
                     modifier = Modifier.align(Alignment.CenterStart)
                 ) {
                     Icon(
@@ -159,106 +161,8 @@ fun MessagesScreen(
     }
 }
 
-@Composable
-fun ChatList(
-    navController: NavController,
-    chatList: List<ChatEntity>,
-    currentUserId: String,
-    userNameMap: Map<String, String>,
-    userPhotoMap: Map<String, Bitmap?>
-) {
-    LazyColumn(
-        modifier = Modifier.padding(8.dp).background(color = Color.Transparent),
-        contentPadding = PaddingValues(bottom = 16.dp)
-    ) {
-        items(chatList) { chat ->
-            ChatItem(navController, chat, currentUserId, userNameMap, userPhotoMap)
-        }
-    }
-}
 
-@Composable
-fun ChatItem(
-    navController: NavController,
-    chat: ChatEntity,
-    currentUserId: String,
-    userNameMap: Map<String, String>,
-    userPhotoMap: Map<String, Bitmap?>
-) {
-    val userIdToShow = if (chat.idFirstUser == currentUserId) chat.idSecondUser else chat.idFirstUser
-    val userName = userNameMap[userIdToShow] ?: "Loading..."
-    val userPhoto = userPhotoMap[userIdToShow]
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .height(65.dp)
-            .clickable { navController.navigate("Chat/${userIdToShow}") },
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (userPhoto != null) {
-                Image(
-                    bitmap = userPhoto.asImageBitmap(),
-                    contentDescription = "User photo",
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(1f)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(1f)
-                        .clip(CircleShape)
-                        .background(Color.Gray),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("N/A", color = Color.White)
-                }
-            }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(
-                modifier = Modifier.fillMaxHeight(0.8f),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = userName,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = chat.lastMessageId.ifEmpty { "Type your first message!" },
-                        color = Color.Gray,
-                        fontSize = 14.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = formatTime(chat.lastUpdateTime),
-                        color = Color.Gray,
-                        fontSize = 12.sp
-                    )
-                }
-
-            }
-        }
-    }
-}
 
 
