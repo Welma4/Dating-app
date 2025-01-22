@@ -19,7 +19,8 @@ import androidx.compose.ui.unit.sp
 import com.example.datingapp.data.MessageEntity
 import com.example.datingapp.ui.theme.GrayBlue
 import com.example.datingapp.ui.theme.MediumPink
-import com.example.datingapp.ui.utils.formatTime
+import com.example.datingapp.ui.utils.formatTimeToHHmm
+import com.example.datingapp.ui.utils.formatTimeToMdHm
 
 @Composable
 fun MessageCard(
@@ -34,15 +35,14 @@ fun MessageCard(
     ) {
         if (isFromCurrent) {
             Text(
-                text = formatTime(message.sendTime),
+                text = formatTimeToHHmm(message.sendTime),
                 fontSize = 12.sp,
                 color = Color.Gray,
                 modifier = Modifier
-                    .align(Alignment.Bottom)
                     .padding(end = 8.dp)
+                    .align(Alignment.Bottom)
             )
         }
-
         Card(
             modifier = Modifier
                 .weight(1f, false)
@@ -65,7 +65,7 @@ fun MessageCard(
 
         if (!isFromCurrent) {
             Text(
-                text = formatTime(message.sendTime),
+                text = formatTimeToHHmm(message.sendTime),
                 fontSize = 12.sp,
                 color = Color.Gray,
                 modifier = Modifier

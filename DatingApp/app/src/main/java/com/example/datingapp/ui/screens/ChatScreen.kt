@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,8 +17,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -27,8 +24,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,7 +49,6 @@ import com.example.datingapp.viewmodel.ChatViewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.text.TextStyle
 import com.example.datingapp.data.MessageEntity
 import com.example.datingapp.data.Routes
@@ -62,7 +56,7 @@ import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.components.MessageCard
 import com.example.datingapp.ui.theme.GrayBlue
 import com.example.datingapp.ui.theme.MediumPink
-import com.example.datingapp.ui.utils.formatTime
+import com.example.datingapp.ui.utils.formatTimeTodMy
 import com.example.datingapp.ui.utils.getCurrentDateTime
 import com.example.datingapp.viewmodel.MessageViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
@@ -231,7 +225,24 @@ fun ChatScreen(
                                 .fillMaxWidth()
                                 .padding(start = 20.dp, end = 20.dp, bottom = 80.dp, top = 0.dp)
                         ) {
+                            var previousDate: String? = null
                             items(messages) { message ->
+                                val currentDate = formatTimeTodMy(message.sendTime)
+                                if (previousDate != currentDate) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 36.dp, bottom = 10.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = currentDate,
+                                            fontSize = 14.sp,
+                                            color = Color.Gray,
+                                        )
+                                    }
+                                    previousDate = currentDate
+                                }
                                 MessageCard(message, message.idUser == currentUserId)
                             }
                         }
