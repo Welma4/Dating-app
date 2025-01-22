@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.datingapp.data.ChatEntity
-import com.example.datingapp.ui.utils.formatTime
+import com.example.datingapp.ui.utils.formatTimeToHHmm
 
 @Composable
 fun ChatItem(
@@ -108,7 +108,7 @@ fun ChatItem(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = formatTime(chat.lastUpdateTime),
+                        text = formatTimeToHHmm(chat.lastUpdateTime),
                         color = Color.Gray,
                         fontSize = 12.sp
                     )
