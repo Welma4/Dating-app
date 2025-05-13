@@ -1,6 +1,5 @@
 package com.example.datingapp.ui.components
 
-import AgeRangeSelector
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -62,43 +61,46 @@ fun FiltersDialog(
             },
             onFailure = { error ->
                 Log.d("MyTag", error)
-            }
+            },
         )
     }
-
 
     if (isDialog) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.6f))
+                .background(Color.Black.copy(alpha = 0.6f)),
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.35f)
-                    .background(Color.White, shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
+                    .background(Color.White, shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)),
             ) {
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
-                            .padding(top = 35.dp, bottom = 25.dp)
+                            .padding(top = 35.dp, bottom = 25.dp),
                     ) {
                         IconButton(
                             modifier = Modifier.size(24.dp),
-                            onClick = { onDialogChange(false) }
+                            onClick = { onDialogChange(false) },
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
                                 contentDescription = "close",
-                                modifier = Modifier
-                                    .size(24.dp)
+                                modifier =
+                                Modifier
+                                    .size(24.dp),
                             )
                         }
                         Spacer(modifier = Modifier.weight(0.8f))
@@ -107,7 +109,7 @@ fun FiltersDialog(
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.weight(1f),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         IconButton(
@@ -122,7 +124,7 @@ fun FiltersDialog(
                                                 FirebaseAuth.getInstance().currentUser?.uid ?: "",
                                                 genderId,
                                                 ageRange.first,
-                                                ageRange.second
+                                                ageRange.second,
                                             ),
                                             onSuccess = {
                                                 Log.d("MyTag", "Preferences successfully saved")
@@ -130,28 +132,30 @@ fun FiltersDialog(
                                                 onAgeRangeChange(ageRange)
                                             },
                                             onFailure = { error ->
-                                                Log.d("MyTag", "Error saving preferences: ${error}")
-                                            }
+                                                Log.d("MyTag", "Error saving preferences: $error")
+                                            },
                                         )
                                         onDialogChange(false)
                                     },
                                     onFailure = { error ->
                                         Log.d("MyTag", error)
-                                    }
+                                    },
                                 )
-                            }
+                            },
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_save_filters),
                                 tint = MediumPink,
                                 contentDescription = "save",
-                                modifier = Modifier
-                                    .size(24.dp)
+                                modifier =
+                                Modifier
+                                    .size(24.dp),
                             )
                         }
                     }
                     Column(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 10.dp),
                     ) {
@@ -160,7 +164,7 @@ fun FiltersDialog(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black,
-                            textAlign = TextAlign.Left
+                            textAlign = TextAlign.Left,
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         GenderPreferenceMenu(selectedGender = selectedGender, onGenderSelected = { selectedGender = it })
@@ -170,11 +174,11 @@ fun FiltersDialog(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black,
-                            textAlign = TextAlign.Left
+                            textAlign = TextAlign.Left,
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         AgeRangeSelector(
-                            initialRange = ageRange
+                            initialRange = ageRange,
                         ) { startAge, endAge ->
                             ageRange = startAge to endAge
                         }

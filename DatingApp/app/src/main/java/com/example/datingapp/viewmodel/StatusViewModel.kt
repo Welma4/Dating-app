@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import com.example.datingapp.data.StatusEntity
 import com.google.firebase.firestore.FirebaseFirestore
 
-
 class StatusViewModel : ViewModel() {
     private val db = FirebaseFirestore.getInstance()
 
@@ -17,7 +16,7 @@ class StatusViewModel : ViewModel() {
     fun saveStatusesToFirestore() {
         val statusData = listOf(
             StatusEntity(statusName = "accepted"),
-            StatusEntity(statusName = "waiting")
+            StatusEntity(statusName = "waiting"),
         )
 
         db.collection("status").get()
@@ -65,7 +64,7 @@ class StatusViewModel : ViewModel() {
     fun getIdByStatusName(
         statusName: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         db.collection("status")
             .whereEqualTo("statusName", statusName)
@@ -85,7 +84,7 @@ class StatusViewModel : ViewModel() {
     fun getStatusNameById(
         idStatus: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         db.collection("status")
             .document(idStatus)

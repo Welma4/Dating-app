@@ -60,7 +60,7 @@ fun VerticalSwipeFeed(
     matchViewModel: MatchViewModel,
     chatViewModel: ChatViewModel,
     currentUserId: String,
-    onMatch: (String) -> Unit
+    onMatch: (String) -> Unit,
 ) {
     val pagerState = rememberPagerState()
     val itemCount = items.size
@@ -75,7 +75,7 @@ fun VerticalSwipeFeed(
                 },
                 onFailure = { error ->
                     Log.e("MyTag", "Error loading photo for user ${user.uid}: $error")
-                }
+                },
             )
         }
     }
@@ -83,7 +83,8 @@ fun VerticalSwipeFeed(
     VerticalPager(
         count = Int.MAX_VALUE,
         state = pagerState,
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxHeight(0.92f)
             .padding(horizontal = 16.dp),
         itemSpacing = 30.dp,
@@ -97,12 +98,13 @@ fun VerticalSwipeFeed(
 
         val filterAlpha by animateFloatAsState(
             targetValue = if (hasLiked) 0.3f else (dragOffset / 300f).coerceIn(0f, 0.3f),
-            animationSpec = tween(durationMillis = 100)
+            animationSpec = tween(durationMillis = 100),
         )
         val showHeartIcon = filterAlpha >= 0.3f
 
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
                 .pointerInput(Unit) {
@@ -130,7 +132,7 @@ fun VerticalSwipeFeed(
                                                         },
                                                         onFailure = { error ->
                                                             Log.d("MyTag", error)
-                                                        }
+                                                        },
                                                     )
                                                 },
                                                 onSuccess = {
@@ -138,12 +140,12 @@ fun VerticalSwipeFeed(
                                                 },
                                                 onFailure = { error ->
                                                     Log.e("MyTag", "Match creation failed: $error")
-                                                }
+                                                },
                                             )
                                         },
                                         onFailure = { error ->
                                             Log.d("MyTag", "Like save error: $error")
-                                        }
+                                        },
                                     )
                                 }
                             }
@@ -152,90 +154,93 @@ fun VerticalSwipeFeed(
                             if (!hasLiked) {
                                 dragOffset = 0f
                             }
-                        }
+                        },
                     )
-                }
+                },
         ) {
             if (userPhoto != null) {
                 Image(
                     bitmap = userPhoto.asImageBitmap(),
                     contentDescription = "user_photo",
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxSize()
                         .shadow(
                             elevation = 8.dp,
                             shape = RoundedCornerShape(30.dp),
                             spotColor = Color.Black,
-                            ambientColor = Color.Black
-                        )
-                        .clip(RoundedCornerShape(30.dp)),
-                    contentScale = ContentScale.Crop
+                            ambientColor = Color.Black,
+                        ).clip(RoundedCornerShape(30.dp)),
+                    contentScale = ContentScale.Crop,
                 )
             } else {
                 Image(
                     painter = painterResource(id = R.drawable.default_icon),
                     contentDescription = "default_photo",
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxSize()
                         .shadow(
                             elevation = 8.dp,
                             shape = RoundedCornerShape(30.dp),
                             spotColor = Color.Black,
-                            ambientColor = Color.Black
-                        )
-                        .clip(RoundedCornerShape(30.dp)),
-                    contentScale = ContentScale.Crop
+                            ambientColor = Color.Black,
+                        ).clip(RoundedCornerShape(30.dp)),
+                    contentScale = ContentScale.Crop,
                 )
             }
 
             if (filterAlpha > 0f) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxSize()
                         .clip(RoundedCornerShape(30.dp))
                         .background(LikePinkAlpha)
-                        .alpha(filterAlpha)
+                        .alpha(filterAlpha),
                 )
             }
 
             if (showHeartIcon) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxSize()
-                        .wrapContentSize(align = Alignment.Center)
+                        .wrapContentSize(align = Alignment.Center),
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_heart),
                         contentDescription = "Heart Icon",
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .size(100.dp)
                             .alpha(1f),
-                        tint = LikePink
+                        tint = LikePink,
                     )
                 }
             }
 
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .align(Alignment.BottomStart)
-                    .padding(horizontal = 16.dp, vertical = 15.dp)
+                    .padding(horizontal = 16.dp, vertical = 15.dp),
             ) {
                 Text(
                     text = "${user.firstName}  ${user.secondName}, ${calculateAge(user.birthDate!!)}",
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
-                    style = TextStyle(shadow = Shadow(MediumGray, Offset(5.0f, 2.0f), 1.0f))
+                    style = TextStyle(shadow = Shadow(MediumGray, Offset(5.0f, 2.0f), 1.0f)),
                 )
                 Text(
                     text = user.location,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
                     color = Color.White,
-                    style = TextStyle(shadow = Shadow(MediumGray, Offset(5.0f, 2.0f), 1.0f))
+                    style = TextStyle(shadow = Shadow(MediumGray, Offset(5.0f, 2.0f), 1.0f)),
                 )
             }
         }
     }
-
 }

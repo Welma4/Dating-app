@@ -1,6 +1,8 @@
 package com.example.datingapp.ui.components
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -8,12 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.TextUnit
 import com.example.datingapp.ui.theme.poppinsFontFamily
-
 
 @Composable
 fun CustomButton(
@@ -22,7 +22,7 @@ fun CustomButton(
     modifier: Modifier = Modifier,
     backgroundColor: Color = Color(0xFFAA3FEC),
     textColor: Color = Color.White,
-    textSize: TextUnit = 16.sp
+    textSize: TextUnit = 16.sp,
 ) {
     Button(
         onClick = onClick,
@@ -30,14 +30,14 @@ fun CustomButton(
         modifier = modifier
             .fillMaxWidth()
             .height(65.dp)
-            .padding(bottom = 10.dp)
+            .padding(bottom = 10.dp),
     ) {
         Text(
             text = text,
             fontFamily = poppinsFontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 16.sp,
-            color = Color.White
+            color = Color.White,
         )
     }
 }

@@ -1,6 +1,5 @@
 package com.example.datingapp.ui.screens
 
-import ProfileViewModel
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.util.Log
@@ -38,18 +37,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.datingapp.R
-import com.example.datingapp.viewmodel.ChatViewModel
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.text.TextStyle
 import com.example.datingapp.data.MessageEntity
 import com.example.datingapp.data.Routes
 import com.example.datingapp.data.UserEntity
@@ -58,9 +56,10 @@ import com.example.datingapp.ui.theme.GrayBlue
 import com.example.datingapp.ui.theme.MediumPink
 import com.example.datingapp.ui.utils.formatTimeTodMy
 import com.example.datingapp.ui.utils.getCurrentDateTime
+import com.example.datingapp.viewmodel.ChatViewModel
 import com.example.datingapp.viewmodel.MessageViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
-
+import com.example.datingapp.viewmodel.ProfileViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -71,7 +70,7 @@ fun ChatScreen(
     profileViewModel: ProfileViewModel,
     photoViewModel: PhotoViewModel,
     messageViewModel: MessageViewModel,
-    currentUserId: String
+    currentUserId: String,
 ) {
     var text by remember { mutableStateOf("") }
     val interlocutor = remember { mutableStateOf(UserEntity()) }
@@ -91,7 +90,7 @@ fun ChatScreen(
             onFailure = { error ->
                 Log.d("MyTag", "Error loading interlocutor photo: $error")
                 isLoading = false
-            }
+            },
         )
 
         profileViewModel.fetchUserFromFirestore(
@@ -103,7 +102,7 @@ fun ChatScreen(
             onFailure = { error ->
                 Log.d("MyTag", error)
                 isLoading = false
-            }
+            },
         )
 
         chatViewModel.fetchChatId(
@@ -120,59 +119,65 @@ fun ChatScreen(
                     onFailure = { error ->
                         Log.d("MyTag", error)
                         isLoading = false
-                    }
+                    },
                 )
             },
             onFailure = { error ->
                 Log.d("MyTag", error)
                 isLoading = false
-            }
+            },
         )
     }
 
-
     Scaffold(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxSize()
             .imePadding(),
         content = {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
             ) {
                 Column(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 ) {
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
-                            .padding(start = 0.dp, end = 0.dp, top = 24.dp, bottom = 8.dp)
+                            .padding(start = 0.dp, end = 0.dp, top = 24.dp, bottom = 8.dp),
                     ) {
                         IconButton(
                             onClick = { navController.navigate(Routes.Messages) },
-                            modifier = Modifier.align(Alignment.CenterStart)
+                            modifier = Modifier.align(Alignment.CenterStart),
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_back_arrow),
                                 contentDescription = "Back Arrow",
                                 tint = Color.Black,
-                                modifier = Modifier.size(32.dp)
+                                modifier = Modifier.size(32.dp),
                             )
                         }
                         Row(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .align(Alignment.CenterStart)
-                                .padding(start = 70.dp)
+                                .padding(start = 70.dp),
                         ) {
                             interlocutorPhoto.value?.let { bitmap ->
                                 Image(
-                                    bitmap = Bitmap.createScaledBitmap(bitmap, 45, 45, false)
+                                    bitmap =
+                                    Bitmap
+                                        .createScaledBitmap(bitmap, 45, 45, false)
                                         .asImageBitmap(),
                                     contentDescription = "likedUserPhoto",
-                                    modifier = Modifier
+                                    modifier =
+                                    Modifier
                                         .size(45.dp)
-                                        .clip(CircleShape)
+                                        .clip(CircleShape),
                                 )
                             }
                             Spacer(modifier = Modifier.width(8.dp))
@@ -184,7 +189,6 @@ fun ChatScreen(
                                 fontWeight = FontWeight.Bold,
                             )
                         }
-
                     }
 
                     val listState = rememberLazyListState()
@@ -197,43 +201,46 @@ fun ChatScreen(
                     if (isLoading) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.Center,
                         ) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(200.dp),
-                                color = MediumPink
+                                color = MediumPink,
                             )
                         }
                     } else if (messages.isEmpty()) {
                         Box(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxSize()
                                 .padding(vertical = 16.dp),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.Center,
                         ) {
                             Text(
                                 text = "There are no messages here yet. Write first!",
                                 color = Color.Gray,
-                                fontSize = 16.sp
+                                fontSize = 16.sp,
                             )
                         }
                     } else {
                         LazyColumn(
                             state = listState,
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .weight(1f)
                                 .fillMaxWidth()
-                                .padding(start = 20.dp, end = 20.dp, bottom = 80.dp, top = 0.dp)
+                                .padding(start = 20.dp, end = 20.dp, bottom = 80.dp, top = 0.dp),
                         ) {
                             var previousDate: String? = null
                             items(messages) { message ->
                                 val currentDate = formatTimeTodMy(message.sendTime)
                                 if (previousDate != currentDate) {
                                     Box(
-                                        modifier = Modifier
+                                        modifier =
+                                        Modifier
                                             .fillMaxWidth()
                                             .padding(top = 36.dp, bottom = 10.dp),
-                                        contentAlignment = Alignment.Center
+                                        contentAlignment = Alignment.Center,
                                     ) {
                                         Text(
                                             text = currentDate,
@@ -250,15 +257,17 @@ fun ChatScreen(
                 }
 
                 Row(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
                         .padding(bottom = 24.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     TextField(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .weight(1f)
                             .height(52.dp)
                             .clip(shape = RoundedCornerShape(24.dp)),
@@ -267,21 +276,23 @@ fun ChatScreen(
                             Text(
                                 text = "Type Something...",
                                 color = Color.Gray,
-                                fontSize = 16.sp
+                                fontSize = 16.sp,
                             )
                         },
                         textStyle = TextStyle(fontSize = 16.sp),
-                        colors = TextFieldDefaults.colors(
+                        colors =
+                        TextFieldDefaults.colors(
                             unfocusedContainerColor = GrayBlue,
                             focusedContainerColor = GrayBlue,
                             focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
+                            unfocusedIndicatorColor = Color.Transparent,
                         ),
                         onValueChange = { text = it },
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .height(52.dp)
                             .clip(shape = RoundedCornerShape(24.dp)),
                         onClick = {
@@ -302,12 +313,12 @@ fun ChatScreen(
                                             },
                                             onFailure = { error ->
                                                 Log.d("MyTag", error)
-                                            }
+                                            },
                                         )
                                     },
                                     onFailure = { error ->
                                         Log.d("MyTag", error)
-                                    }
+                                    },
                                 )
                             }
                         },
@@ -316,13 +327,11 @@ fun ChatScreen(
                         Text(
                             text = ">",
                             color = if (text.isEmpty()) Color.Gray else Color.White,
-                            fontSize = 24.sp
+                            fontSize = 24.sp,
                         )
                     }
                 }
             }
-        }
+        },
     )
 }
-
-

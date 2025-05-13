@@ -20,15 +20,14 @@ import com.example.datingapp.data.GenderEntity
 fun GenderMenu(
     options: List<GenderEntity>,
     selectedGender: String,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
 ) {
-
     var expanded by remember { mutableStateOf(false) }
     var currentGender by remember { mutableStateOf(selectedGender) }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
+        onExpandedChange = { expanded = !expanded },
     ) {
         OutlinedTextField(
             modifier = Modifier
@@ -40,14 +39,14 @@ fun GenderMenu(
             label = { Text(text = "Gender") },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded
+                    expanded = expanded,
                 )
             },
         )
         ExposedDropdownMenu(
             expanded = expanded,
             modifier = Modifier.fillMaxWidth(),
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
         ) {
             options.forEach { gender ->
                 DropdownMenuItem(
@@ -56,7 +55,7 @@ fun GenderMenu(
                         currentGender = gender.genderName
                         expanded = false
                         onValueChange(gender.genderName)
-                    }
+                    },
                 )
             }
         }

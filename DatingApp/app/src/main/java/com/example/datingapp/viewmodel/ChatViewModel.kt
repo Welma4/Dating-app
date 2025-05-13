@@ -1,7 +1,5 @@
 package com.example.datingapp.viewmodel
 
-import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,35 +19,32 @@ class ChatViewModel : ViewModel() {
         firstUserId: String,
         secondUserId: String,
         onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
-
         chatCol
             .whereIn("idFirstUser", listOf(firstUserId, secondUserId))
             .whereIn("idSecondUser", listOf(firstUserId, secondUserId))
             .get()
             .addOnSuccessListener { querySnapshot ->
                 if (querySnapshot.isEmpty) {
-                    val chatData = hashMapOf(
-                        "idFirstUser" to firstUserId,
-                        "idSecondUser" to secondUserId,
-                        "lastMessageId" to "",
-                        "lastUpdateTime" to getCurrentTime()
-                    )
+                    val chatData =
+                        hashMapOf(
+                            "idFirstUser" to firstUserId,
+                            "idSecondUser" to secondUserId,
+                            "lastMessageId" to "",
+                            "lastUpdateTime" to getCurrentTime(),
+                        )
                     chatCol
                         .add(chatData)
                         .addOnSuccessListener {
                             onSuccess()
-                        }
-                        .addOnFailureListener { e ->
+                        }.addOnFailureListener { e ->
                             onFailure(e.message ?: "Error adding new chat")
                         }
-                }
-                else {
+                } else {
                     onFailure("Chat already exists")
                 }
-            }
-            .addOnFailureListener { e ->
+            }.addOnFailureListener { e ->
                 onFailure(e.message ?: "Error checking existing chat")
             }
     }
@@ -58,7 +53,7 @@ class ChatViewModel : ViewModel() {
         firstUserId: String,
         secondUserId: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         chatCol
             .whereIn("idFirstUser", listOf(firstUserId, secondUserId))
@@ -69,10 +64,9 @@ class ChatViewModel : ViewModel() {
                     val document = querySnapshot.documents.first()
                     onSuccess(document.id)
                 } else {
-                    onFailure("Chat for ${firstUserId} and ${secondUserId} was not found")
+                    onFailure("Chat for $firstUserId and $secondUserId was not found")
                 }
-            }
-            .addOnFailureListener { error ->
+            }.addOnFailureListener { error ->
                 onFailure(error.message ?: "Error finding chat")
             }
     }
@@ -80,14 +74,16 @@ class ChatViewModel : ViewModel() {
     fun fetchChatsForUser(
         userId: String,
         onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         val firstUserQuery = chatCol.whereEqualTo("idFirstUser", userId)
         val secondUserQuery = chatCol.whereEqualTo("idSecondUser", userId)
 
-        firstUserQuery.get()
+        firstUserQuery
+            .get()
             .addOnSuccessListener { firstUserSnapshot ->
-                secondUserQuery.get()
+                secondUserQuery
+                    .get()
                     .addOnSuccessListener { secondUserSnapshot ->
                         val firstUserChats = firstUserSnapshot.documents.mapNotNull { it.toObject<ChatEntity>() }
                         val secondUserChats = secondUserSnapshot.documents.mapNotNull { it.toObject<ChatEntity>() }
@@ -96,12 +92,10 @@ class ChatViewModel : ViewModel() {
 
                         _chatList.value = allChats.sortedByDescending { it.lastUpdateTime }
                         onSuccess()
-                    }
-                    .addOnFailureListener { error ->
+                    }.addOnFailureListener { error ->
                         onFailure(error.message ?: "Error fetching second user chats")
                     }
-            }
-            .addOnFailureListener { error ->
+            }.addOnFailureListener { error ->
                 onFailure(error.message ?: "Error fetching first user chats")
             }
     }
@@ -111,7 +105,7 @@ class ChatViewModel : ViewModel() {
         lastMessageId: String,
         lastMessageTime: String,
         onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         val docRef = chatCol.document(chatId)
 
@@ -119,22 +113,20 @@ class ChatViewModel : ViewModel() {
             .get()
             .addOnSuccessListener { querySnapshot ->
                 if (querySnapshot.exists()) {
-                    val updatedFields = hashMapOf<String, Any>(
-                        "lastMessageId" to lastMessageId,
-                        "lastUpdateTime" to lastMessageTime
-                    )
-                    docRef.update(updatedFields)
+                    val updatedFields =
+                        hashMapOf<String, Any>(
+                            "lastMessageId" to lastMessageId,
+                            "lastUpdateTime" to lastMessageTime,
+                        )
+                    docRef
+                        .update(updatedFields)
                         .addOnSuccessListener {
                             onSuccess()
-                        }
-                        .addOnFailureListener {
-                                error ->
+                        }.addOnFailureListener { error ->
                             onFailure(error.message ?: "Error fetching first user chats")
                         }
                 }
-            }
-            .addOnFailureListener {
-                    error ->
+            }.addOnFailureListener { error ->
                 onFailure(error.message ?: "Error fetching first user chats")
             }
     }

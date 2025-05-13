@@ -1,6 +1,5 @@
 package com.example.datingapp.data
 
-import java.util.Calendar
 import java.util.Date
 
 data class UserEntity(
@@ -13,4 +12,3 @@ data class UserEntity(
     val birthDate: Date? = Date(),
     val gender: String = "Loading...",
 )
-

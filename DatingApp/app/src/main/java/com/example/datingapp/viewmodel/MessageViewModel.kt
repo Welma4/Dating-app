@@ -16,13 +16,13 @@ class MessageViewModel : ViewModel() {
         idChat: String,
         messageText: String,
         onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         val message = MessageEntity(
             idUser,
             getCurrentDateTime(),
             idChat,
-            messageText
+            messageText,
         )
         messageCol
             .add(message)
@@ -37,7 +37,7 @@ class MessageViewModel : ViewModel() {
     fun fetchMessagesForChatRealtime(
         chatId: String,
         onSuccess: (List<MessageEntity>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         messageCol
             .whereEqualTo("idChat", chatId)
@@ -57,7 +57,7 @@ class MessageViewModel : ViewModel() {
     fun fetchMessageById(
         messageId: String,
         onSuccess: (MessageEntity) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         messageCol
             .document(messageId)

@@ -1,9 +1,7 @@
 package com.example.datingapp.navigation
 
-import androidx.compose.runtime.Composable
-import ProfileViewModel
-import SignUpScreen
 import android.util.Log
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,6 +24,7 @@ import com.example.datingapp.ui.screens.MessagesScreen
 import com.example.datingapp.ui.screens.PhotoRequestScreen
 import com.example.datingapp.ui.screens.ProfileScreen
 import com.example.datingapp.ui.screens.SignInScreen
+import com.example.datingapp.ui.screens.SignUpScreen
 import com.example.datingapp.viewmodel.ChatViewModel
 import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.LikeViewModel
@@ -33,6 +32,7 @@ import com.example.datingapp.viewmodel.MatchViewModel
 import com.example.datingapp.viewmodel.MessageViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 import com.example.datingapp.viewmodel.PreferencesViewModel
+import com.example.datingapp.viewmodel.ProfileViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -53,7 +53,7 @@ fun DatingApp() {
     val messageViewModel: MessageViewModel = viewModel()
     val auth = Firebase.auth
 
-    var currentUserId by remember { mutableStateOf(auth.currentUser?.uid ?: "")  }
+    var currentUserId by remember { mutableStateOf(auth.currentUser?.uid ?: "") }
     DisposableEffect(Unit) {
         val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             currentUserId = firebaseAuth.currentUser?.uid ?: ""
@@ -67,14 +67,13 @@ fun DatingApp() {
     }
 
     NavHost(navController, startDestination = if (auth.currentUser != null) Routes.Home else Routes.Login) {
-
         composable(Routes.SignUp) {
             SignUpScreen(
                 navController,
                 profileViewModel,
                 photoViewModel,
                 genderViewModel,
-                preferencesViewModel
+                preferencesViewModel,
             )
         }
 
@@ -96,7 +95,7 @@ fun DatingApp() {
                 likeViewModel,
                 matchViewModel,
                 chatViewModel,
-                currentUserId
+                currentUserId,
             )
         }
 
@@ -105,7 +104,7 @@ fun DatingApp() {
                 navController,
                 profileViewModel,
                 photoViewModel,
-                genderViewModel
+                genderViewModel,
             )
         }
         composable(Routes.EditProfile) {
@@ -122,10 +121,10 @@ fun DatingApp() {
                         },
                         onFailure = { error ->
                             Log.d("MyLog", error)
-                        }
+                        },
                     )
                     profileViewModel.updateUser(updatedUser)
-                }
+                },
             )
         }
 
@@ -137,7 +136,7 @@ fun DatingApp() {
                 likeViewModel,
                 photoViewModel,
                 matchViewModel,
-                chatViewModel
+                chatViewModel,
             )
         }
 
@@ -147,13 +146,13 @@ fun DatingApp() {
                 chatViewModel,
                 profileViewModel,
                 photoViewModel,
-                currentUserId
+                currentUserId,
             )
         }
 
         composable(
             Routes.Chat,
-            arguments = listOf(navArgument("chatId") { type = NavType.StringType })
+            arguments = listOf(navArgument("chatId") { type = NavType.StringType }),
         ) { backStackEntry ->
             val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
             ChatScreen(
@@ -163,7 +162,7 @@ fun DatingApp() {
                 profileViewModel = profileViewModel,
                 photoViewModel = photoViewModel,
                 messageViewModel = messageViewModel,
-                currentUserId = currentUserId
+                currentUserId = currentUserId,
             )
         }
 

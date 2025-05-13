@@ -22,7 +22,7 @@ fun LoginTextField(
     value: String,
     label: String,
     isError: Boolean = false,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
@@ -42,15 +42,15 @@ fun LoginTextField(
                     isFocused -> Color.Gray
                     isError -> Color.Red
                     else -> Color.Gray
-                }
+                },
             )
         },
         onValueChange = onValueChange,
         colors = TextFieldDefaults.textFieldColors(
             containerColor = Color.White,
             focusedIndicatorColor = Color.Gray,
-            unfocusedIndicatorColor = if (isError) Color.Red else Color.Gray
+            unfocusedIndicatorColor = if (isError) Color.Red else Color.Gray,
         ),
-        singleLine = true
+        singleLine = true,
     )
 }

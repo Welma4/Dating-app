@@ -1,5 +1,5 @@
 package com.example.datingapp.data
 
 data class StatusEntity(
-    val statusName: String = ""
+    val statusName: String = "",
 )

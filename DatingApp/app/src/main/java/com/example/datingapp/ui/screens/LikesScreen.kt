@@ -1,27 +1,17 @@
 package com.example.datingapp.ui.screens
 
-import ProfileViewModel
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.util.Log
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,36 +25,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.datingapp.R
-import com.example.datingapp.data.LikeEntity
 import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.components.CustomButton
 import com.example.datingapp.ui.components.MatchDialog
 import com.example.datingapp.ui.components.NavigationMenu
 import com.example.datingapp.ui.components.UserLikesYouCard
 import com.example.datingapp.ui.components.UserYouLikeCard
-import com.example.datingapp.ui.theme.LikePink
-import com.example.datingapp.ui.theme.LikePinkAlpha
 import com.example.datingapp.ui.theme.MediumGray
 import com.example.datingapp.ui.theme.MediumPink
-import com.example.datingapp.ui.utils.calculateAge
 import com.example.datingapp.viewmodel.ChatViewModel
 import com.example.datingapp.viewmodel.LikeViewModel
 import com.example.datingapp.viewmodel.MatchViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
+import com.example.datingapp.viewmodel.ProfileViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -75,7 +56,7 @@ fun LikeScreen(
     likeViewModel: LikeViewModel,
     photoViewModel: PhotoViewModel,
     matchViewModel: MatchViewModel,
-    chatViewModel: ChatViewModel
+    chatViewModel: ChatViewModel,
 ) {
     val likedUsers = remember { mutableStateOf<List<Pair<UserEntity, Bitmap?>>>(emptyList()) }
     val usersWhoLiked = remember { mutableStateOf<List<Pair<UserEntity, Bitmap?>>>(emptyList()) }
@@ -122,7 +103,7 @@ fun LikeScreen(
                                         likedUsers.value = userPhotos
                                     }
                                     isLoading.value = false
-                                }
+                                },
                             )
                         },
                         onFailure = {
@@ -130,14 +111,14 @@ fun LikeScreen(
                             if (remainingIds.isEmpty()) {
                                 isLoading.value = false
                             }
-                        }
+                        },
                     )
                 }
             },
             onFailure = {
                 isLoading.value = false
                 likedUsersMessage.value = "Failed to load liked users."
-            }
+            },
         )
     }
 
@@ -175,7 +156,7 @@ fun LikeScreen(
                                         usersWhoLiked.value = userPhotos
                                         isLoading.value = false
                                     }
-                                }
+                                },
                             )
                         },
                         onFailure = {
@@ -183,17 +164,16 @@ fun LikeScreen(
                             if (remainingIds.isEmpty()) {
                                 isLoading.value = false
                             }
-                        }
+                        },
                     )
                 }
             },
             onFailure = {
                 isLoading.value = false
                 usersWhoLikedMessage.value = "Failed to load users who liked you."
-            }
+            },
         )
     }
-
 
     LaunchedEffect(Unit) {
         loadLikedUsers()
@@ -201,23 +181,23 @@ fun LikeScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        bottomBar = { NavigationMenu(navController) }
+        bottomBar = { NavigationMenu(navController) },
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             Box(modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp)) {
                 IconButton(
                     onClick = { navController.popBackStack() },
-                    modifier = Modifier.align(Alignment.CenterStart)
+                    modifier = Modifier.align(Alignment.CenterStart),
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_back_arrow),
                         contentDescription = "Back Arrow",
                         tint = Color.Black,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(32.dp),
                     )
                 }
 
@@ -225,7 +205,7 @@ fun LikeScreen(
                     text = "Likes",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier.align(Alignment.Center),
                 )
             }
 
@@ -241,7 +221,7 @@ fun LikeScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
+                    .padding(bottom = 16.dp),
             )
 
             if (isLoading.value) {
@@ -250,7 +230,7 @@ fun LikeScreen(
                         modifier = Modifier
                             .size(200.dp)
                             .align(Alignment.Center),
-                        color = MediumPink
+                        color = MediumPink,
                     )
                 }
             } else if (isShowingLikedUsers.value) {
@@ -260,7 +240,7 @@ fun LikeScreen(
                             text = likedUsersMessage.value,
                             fontSize = 16.sp,
                             textAlign = TextAlign.Center,
-                            color = MediumGray
+                            color = MediumGray,
                         )
                     }
                 } else {
@@ -282,7 +262,7 @@ fun LikeScreen(
                             text = usersWhoLikedMessage.value,
                             fontSize = 16.sp,
                             textAlign = TextAlign.Center,
-                            color = MediumGray
+                            color = MediumGray,
                         )
                     }
                 } else {
@@ -303,7 +283,7 @@ fun LikeScreen(
                                 onMatch = { id ->
                                     matchedUserId.value = id
                                     showMatchDialog.value = true
-                                }
+                                },
                             )
                         }
                     }
@@ -318,10 +298,7 @@ fun LikeScreen(
             likedUserId = matchedUserId.value,
             onDismiss = { showMatchDialog.value = false },
             photoViewModel = photoViewModel,
-            profileViewModel = profileViewModel
+            profileViewModel = profileViewModel,
         )
     }
 }
-
-
-

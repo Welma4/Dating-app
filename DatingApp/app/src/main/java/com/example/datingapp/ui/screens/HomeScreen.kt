@@ -1,37 +1,30 @@
 package com.example.datingapp.ui.screens
 
-import ProfileViewModel
 import VerticalSwipeFeed
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
-import com.example.datingapp.ui.components.NavigationMenu
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.datingapp.R
+import androidx.navigation.NavController
 import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.components.FiltersDialog
 import com.example.datingapp.ui.components.HomeHeaderSection
-import com.example.datingapp.ui.components.LoadingState
 import com.example.datingapp.ui.components.MatchDialog
+import com.example.datingapp.ui.components.NavigationMenu
 import com.example.datingapp.ui.theme.MediumPink
 import com.example.datingapp.viewmodel.ChatViewModel
 import com.example.datingapp.viewmodel.GenderViewModel
@@ -39,9 +32,8 @@ import com.example.datingapp.viewmodel.LikeViewModel
 import com.example.datingapp.viewmodel.MatchViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 import com.example.datingapp.viewmodel.PreferencesViewModel
-import com.example.datingapp.viewmodel.StatusViewModel
+import com.example.datingapp.viewmodel.ProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
-
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -54,7 +46,7 @@ fun HomeScreen(
     likeViewModel: LikeViewModel,
     matchViewModel: MatchViewModel,
     chatViewModel: ChatViewModel,
-    currentUserId: String
+    currentUserId: String,
 ) {
     val usersList = remember { mutableStateOf<List<UserEntity>>(emptyList()) }
     val isFilterMenuVisible = remember { mutableStateOf(false) }
@@ -65,7 +57,6 @@ fun HomeScreen(
 
     val showMatchDialog = remember { mutableStateOf(false) }
     val matchedUserId = remember { mutableStateOf("") }
-
 
     LaunchedEffect(Unit, genderIdPreference, ageRangePreference) {
         isLoading.value = true
@@ -87,16 +78,15 @@ fun HomeScreen(
                     onFailure = { error ->
                         Log.e("HomeScreen", "Error loading users: $error")
                         isLoading.value = false
-                    }
+                    },
                 )
             },
             onFailure = { error ->
                 Log.e("HomeScreen", "Error loading preferences: $error")
                 isLoading.value = false
-            }
+            },
         )
     }
-
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -109,10 +99,11 @@ fun HomeScreen(
                 if (isLoading.value) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         CircularProgressIndicator(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .size(200.dp)
                                 .align(Alignment.Center),
-                            color = MediumPink
+                            color = MediumPink,
                         )
                     }
                 } else {
@@ -127,9 +118,8 @@ fun HomeScreen(
                             onMatch = { id ->
                                 matchedUserId.value = id
                                 showMatchDialog.value = true
-                            }
+                            },
                         )
-
                     } else {
                         Text("No users available")
                     }
@@ -147,7 +137,7 @@ fun HomeScreen(
             },
             onAgeRangeChange = { newAgeRange ->
                 ageRangePreference = newAgeRange
-            }
+            },
         )
         if (showMatchDialog.value) {
             MatchDialog(
@@ -156,12 +146,8 @@ fun HomeScreen(
                 likedUserId = matchedUserId.value,
                 onDismiss = { showMatchDialog.value = false },
                 photoViewModel = photoViewModel,
-                profileViewModel = profileViewModel
+                profileViewModel = profileViewModel,
             )
         }
     }
 }
-
-
-
-

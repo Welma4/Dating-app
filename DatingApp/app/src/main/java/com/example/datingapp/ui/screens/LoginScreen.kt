@@ -37,7 +37,6 @@ import com.example.datingapp.ui.theme.poppinsFontFamily
 fun LoginScreen(
     navController: NavController,
 ) {
-
     MaterialTheme {
         GradientBackground()
     }
@@ -48,13 +47,12 @@ fun LoginScreen(
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-
         Image(
             painter = painterResource(id = R.drawable.app_logo),
             contentDescription = "login_logo",
             modifier = Modifier
                 .padding(top = 80.dp)
-                .size(250.dp)
+                .size(250.dp),
         )
         Spacer(modifier = Modifier.weight(1f))
 
@@ -65,7 +63,7 @@ fun LoginScreen(
                     fontSize = 46.sp,
                     fontFamily = poppinsFontFamily,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = Color.White,
                 ),
                 textAlign = TextAlign.Start,
                 modifier = Modifier.fillMaxWidth(),
@@ -89,16 +87,16 @@ fun LoginScreen(
                     .height(50.dp)
                     .clickable { },
                 colors = ButtonDefaults.buttonColors(Color.White),
-                onClick = {  },
-                border = BorderStroke(2.dp, Color(0xFFEBEAEC))
+                onClick = { },
+                border = BorderStroke(2.dp, Color(0xFFEBEAEC)),
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.google_logo),
                         contentDescription = "Google logo",
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(18.dp),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -107,7 +105,6 @@ fun LoginScreen(
                         fontFamily = poppinsFontFamily,
                     )
                 }
-
             }
 
             Spacer(modifier = Modifier.height(25.dp))
@@ -121,12 +118,12 @@ fun LoginScreen(
                 onClick = { navController.navigate(Routes.SignIn) },
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.email_logo),
                         contentDescription = "Email logo",
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -145,7 +142,7 @@ fun LoginScreen(
                 fontFamily = poppinsFontFamily,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Normal,
-                color = Color.White
+                color = Color.White,
             )
             Text(
                 modifier = Modifier.clickable { navController.navigate(Routes.SignUp) },
@@ -153,9 +150,8 @@ fun LoginScreen(
                 fontFamily = poppinsFontFamily,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = Color.White,
             )
         }
     }
 }
-

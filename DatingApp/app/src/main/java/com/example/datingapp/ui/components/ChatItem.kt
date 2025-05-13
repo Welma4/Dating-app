@@ -41,7 +41,7 @@ fun ChatItem(
     chat: ChatEntity,
     currentUserId: String,
     userNameMap: Map<String, String>,
-    userPhotoMap: Map<String, Bitmap?>
+    userPhotoMap: Map<String, Bitmap?>,
 ) {
     val userIdToShow = if (chat.idFirstUser == currentUserId) chat.idSecondUser else chat.idFirstUser
     val userName = userNameMap[userIdToShow] ?: "Loading..."
@@ -52,12 +52,12 @@ fun ChatItem(
             .fillMaxWidth()
             .padding(16.dp)
             .height(65.dp)
-            .clickable { navController.navigate("Chat/${userIdToShow}") },
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+            .clickable { navController.navigate("Chat/$userIdToShow") },
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             if (userPhoto != null) {
                 Image(
@@ -67,7 +67,7 @@ fun ChatItem(
                         .fillMaxHeight()
                         .aspectRatio(1f)
                         .clip(CircleShape),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
                 )
             } else {
                 Box(
@@ -76,7 +76,7 @@ fun ChatItem(
                         .aspectRatio(1f)
                         .clip(CircleShape)
                         .background(Color.Gray),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text("N/A", color = Color.White)
                 }
@@ -86,7 +86,7 @@ fun ChatItem(
 
             Column(
                 modifier = Modifier.fillMaxHeight(0.8f),
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
                     text = userName,
@@ -96,7 +96,7 @@ fun ChatItem(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = chat.lastMessageId.ifEmpty { "Type your first message!" },
@@ -104,16 +104,15 @@ fun ChatItem(
                         fontSize = 14.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = formatTimeToHHmm(chat.lastUpdateTime),
                         color = Color.Gray,
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
                     )
                 }
-
             }
         }
     }

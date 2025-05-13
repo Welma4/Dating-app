@@ -1,15 +1,32 @@
+package com.example.datingapp.ui.screens
+
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Base64
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.datingapp.R
-import com.example.datingapp.data.GenderEntity
 import com.example.datingapp.data.PreferencesEntity
 import com.example.datingapp.data.Routes
 import com.example.datingapp.data.UserEntity
@@ -33,12 +49,13 @@ import com.example.datingapp.ui.utils.bitmapToBase64
 import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
 import com.example.datingapp.viewmodel.PreferencesViewModel
+import com.example.datingapp.viewmodel.ProfileViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,9 +64,8 @@ fun SignUpScreen(
     profileViewModel: ProfileViewModel,
     photoViewModel: PhotoViewModel,
     genderViewModel: GenderViewModel,
-    preferencesViewModel: PreferencesViewModel
+    preferencesViewModel: PreferencesViewModel,
 ) {
-
     val auth = Firebase.auth
 
     val genders by genderViewModel.genders.observeAsState(emptyList())
@@ -78,28 +94,29 @@ fun SignUpScreen(
         },
         onFailure = { error ->
             Log.d("MyTag", error)
-        }
+        },
     )
 
     val context = LocalContext.current
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp)
+                .padding(vertical = 10.dp),
         ) {
             IconButton(
                 onClick = { navController.navigate(Routes.Login) },
-                modifier = Modifier.background(Color.Transparent)
+                modifier = Modifier.background(Color.Transparent),
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Return to LoginScreen",
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(30.dp),
                 )
             }
         }
@@ -108,15 +125,14 @@ fun SignUpScreen(
                 .fillMaxSize()
                 .padding(horizontal = 15.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
-
             Text(
                 text = "Sign Up",
                 fontFamily = poppinsFontFamily,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = Color.Black,
             )
             Spacer(modifier = Modifier.height(30.dp))
 
@@ -143,7 +159,7 @@ fun SignUpScreen(
                         fontFamily = poppinsFontFamily,
                         fontSize = 14.sp,
                         color = Color.Red,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                     )
                 }
 
@@ -179,7 +195,7 @@ fun SignUpScreen(
                                 },
                                 onSignUpFailure = { error ->
                                     errorState = error
-                                }
+                                },
                             )
                         } else {
                             errorState = "Please fill all required fields!"
@@ -189,24 +205,20 @@ fun SignUpScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(65.dp)
-                        .padding(bottom = 10.dp)
+                        .padding(bottom = 10.dp),
                 ) {
                     Text(
                         text = "SIGN UP",
                         fontFamily = poppinsFontFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 16.sp,
-                        color = Color.White
+                        color = Color.White,
                     )
                 }
             }
         }
     }
-
 }
-
-
-
 
 private fun signUp(
     profileViewModel: ProfileViewModel,
@@ -222,7 +234,7 @@ private fun signUp(
     location: String,
     context: Context,
     onSignUpSuccess: () -> Unit,
-    onSignUpFailure: (String) -> Unit
+    onSignUpFailure: (String) -> Unit,
 ) {
     if (email.isBlank() || password.isBlank()) {
         onSignUpFailure("Email and password cannot be empty!")
@@ -249,7 +261,7 @@ private fun signUp(
                     password = password,
                     location = location,
                     birthDate = birthDateAsDate,
-                    gender = gender
+                    gender = gender,
                 )
                 profileViewModel.saveUserToFirestore(
                     uid,
@@ -257,7 +269,7 @@ private fun signUp(
                     onSuccess = {
                         val defaultImage = BitmapFactory.decodeResource(
                             context.resources,
-                            R.drawable.default_icon
+                            R.drawable.default_icon,
                         )
                         val photoBase64 = bitmapToBase64(defaultImage)
                         photoViewModel.savePhotoToFirestore(
@@ -269,29 +281,25 @@ private fun signUp(
                                         idUser = uid,
                                         gender = maleGender,
                                         startAgeRange = 0,
-                                        endAgeRange = 100
+                                        endAgeRange = 100,
                                     ),
                                     onSuccess = {
                                         onSignUpSuccess()
                                     },
                                     onFailure = { error ->
                                         onSignUpFailure("User created, but preferences error: $error")
-                                    }
+                                    },
                                 )
-
                             },
                             onFailure = { error ->
                                 onSignUpFailure("User created, but photo error: $error")
-                            }
+                            },
                         )
-
                     },
                     onFailure = { error ->
                         onSignUpFailure(error)
-                    }
+                    },
                 )
-
-
             } else {
                 onSignUpFailure(task.exception?.message ?: "Sign Up Error!")
             }
@@ -301,4 +309,4 @@ private fun signUp(
         }
 }
 
-                                                                                                                                                                                                                  const val maleGender = "7QcWbM1utFFkcr0l808a"
+const val maleGender = "7QcWbM1utFFkcr0l808a"

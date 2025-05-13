@@ -6,6 +6,5 @@ data class ChatEntity(
     val idFirstUser: String = "",
     val idSecondUser: String = "",
     val lastMessageId: String = "",
-    val lastUpdateTime: String = getCurrentTime()
+    val lastUpdateTime: String = getCurrentTime(),
 )
-

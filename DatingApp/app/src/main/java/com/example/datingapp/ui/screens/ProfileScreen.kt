@@ -1,12 +1,9 @@
 package com.example.datingapp.ui.screens
 
-import ProfileViewModel
 import android.annotation.SuppressLint
-import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Base64
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,11 +31,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,35 +47,33 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.datingapp.R
 import com.example.datingapp.data.Routes
 import com.example.datingapp.ui.components.NavigationMenu
-import com.example.datingapp.ui.theme.poppinsFontFamily
-import com.example.datingapp.ui.utils.calculateAge
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
-import java.text.SimpleDateFormat
-import java.util.Locale
-import coil.compose.rememberAsyncImagePainter
 import com.example.datingapp.ui.components.ProfileField
 import com.example.datingapp.ui.theme.MediumPink
+import com.example.datingapp.ui.theme.poppinsFontFamily
+import com.example.datingapp.ui.utils.calculateAge
 import com.example.datingapp.ui.utils.imageToBase64
 import com.example.datingapp.viewmodel.GenderViewModel
 import com.example.datingapp.viewmodel.PhotoViewModel
-import com.google.firebase.auth.EmailAuthCredential
+import com.example.datingapp.viewmodel.ProfileViewModel
+import com.google.firebase.Firebase
 import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -90,9 +82,8 @@ fun ProfileScreen(
     navController: NavController,
     profileViewModel: ProfileViewModel,
     photoViewModel: PhotoViewModel,
-    genderViewModel: GenderViewModel
+    genderViewModel: GenderViewModel,
 ) {
-
     val cr = LocalContext.current.contentResolver
 
     val auth = Firebase.auth
@@ -112,7 +103,7 @@ fun ProfileScreen(
                 onFailure = {
                     Log.d("MyLog", "Error fetching photo")
                     bitmapImage = defaultImage
-                }
+                },
             )
         }
     }
@@ -121,12 +112,13 @@ fun ProfileScreen(
 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var isImageLoaded by remember { mutableStateOf(false) }
-    val imageLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        selectedImageUri = uri
-        isImageLoaded = (uri != null)
-    }
+    val imageLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent(),
+        ) { uri ->
+            selectedImageUri = uri
+            isImageLoaded = (uri != null)
+        }
 
     var showDeleteAccountAlert by remember { mutableStateOf(false) }
 
@@ -136,7 +128,7 @@ fun ProfileScreen(
                 currentUser!!.uid,
                 imageToBase64(
                     selectedImageUri!!,
-                    cr
+                    cr,
                 ),
                 onSuccess = {
                     Log.d("MyLog", "Image uploaded successfully")
@@ -147,12 +139,12 @@ fun ProfileScreen(
                         },
                         onFailure = {
                             Log.d("MyLog", "Error fetching photo")
-                        }
+                        },
                     )
                 },
                 onFailure = {
                     Log.d("MyLog", "Image uploading error!")
-                }
+                },
             )
         }
     }
@@ -161,10 +153,11 @@ fun ProfileScreen(
     val dateFormatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
     val formattedDate = dateFormatter.format(profileViewModel.user.value.birthDate!!)
 
-    val gradientColors = listOf(
-        Color(0xFFA020F0),
-        Color(0xFFBC7BE4)
-    )
+    val gradientColors =
+        listOf(
+            Color(0xFFA020F0),
+            Color(0xFFBC7BE4),
+        )
 
     var genderName by remember { mutableStateOf("") }
     genderViewModel.getGenderNameById(
@@ -174,22 +167,24 @@ fun ProfileScreen(
         },
         onFailure = { error ->
             Log.d("MyTag", error)
-        }
+        },
     )
 
     Scaffold(bottomBar = { NavigationMenu(navController) }) {
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .background(Color(0xFFB09DFF))
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth()
                     .height(250.dp)
                     .background(brush = Brush.horizontalGradient(colors = gradientColors)),
-                contentAlignment = Alignment.TopCenter
+                contentAlignment = Alignment.TopCenter,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(modifier = Modifier.height(30.dp))
@@ -198,41 +193,45 @@ fun ProfileScreen(
                         text = "Profile",
                         textAlign = TextAlign.Center,
                         fontSize = 22.sp,
-                        color = Color.White
+                        color = Color.White,
                     )
 
                     Spacer(modifier = Modifier.height(15.dp))
 
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .size(120.dp)
-                            .background(Color.White, CircleShape)
+                            .background(Color.White, CircleShape),
                     ) {
-
                         Image(
-                            painter = rememberAsyncImagePainter(
-                                model = bitmapImage
+                            painter =
+                            rememberAsyncImagePainter(
+                                model = bitmapImage,
                             ),
                             contentDescription = "Profile Picture",
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxSize()
-                                .clip(CircleShape)
+                                .clip(CircleShape),
                         )
                         Box(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxSize(),
-                            contentAlignment = Alignment.TopEnd
+                            contentAlignment = Alignment.TopEnd,
                         ) {
                             IconButton(
                                 onClick = { imageLauncher.launch("image/*") },
-                                modifier = Modifier
-                                    .size(34.dp)
+                                modifier =
+                                Modifier
+                                    .size(34.dp),
                             ) {
                                 Image(
                                     modifier = Modifier.size(34.dp),
                                     painter = painterResource(id = R.drawable.ic_edit),
-                                    contentDescription = "edit"
+                                    contentDescription = "edit",
                                 )
                             }
                         }
@@ -241,7 +240,7 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "${user.firstName}, ${age}",
+                        text = "${user.firstName}, $age",
                         fontSize = 16.sp,
                         color = Color.White,
                     )
@@ -249,17 +248,19 @@ fun ProfileScreen(
             }
 
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .background(Color.White)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
                 Row(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = "Account Settings",
@@ -284,39 +285,43 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Button(
-                    onClick = { signOut(auth)
-                        navController.navigate(Routes.Login) },
+                    onClick = {
+                        signOut(auth)
+                        navController.navigate(Routes.Login)
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAA3FEC)),
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .height(65.dp)
-                        .padding(bottom = 10.dp)
+                        .padding(bottom = 10.dp),
                 ) {
                     Text(
                         text = "SIGN OUT",
                         fontFamily = poppinsFontFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 16.sp,
-                        color = Color.White
+                        color = Color.White,
                     )
                 }
                 Button(
-                    onClick = { 
+                    onClick = {
                         showDeleteAccountAlert = true
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .height(65.dp)
                         .padding(bottom = 10.dp)
-                        .border(shape = RoundedCornerShape(32.dp), color = Color.Gray, width = 1.dp)
+                        .border(shape = RoundedCornerShape(32.dp), color = Color.Gray, width = 1.dp),
                 ) {
                     Text(
                         text = "DELETE ACCOUNT",
                         fontFamily = poppinsFontFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 16.sp,
-                        color = Color.Red
+                        color = Color.Red,
                     )
                 }
                 Spacer(modifier = Modifier.height(70.dp))
@@ -324,25 +329,26 @@ fun ProfileScreen(
             if (showDeleteAccountAlert) {
                 AlertDialog(
                     onDismissRequest = { showDeleteAccountAlert = false },
-                    properties = DialogProperties(dismissOnClickOutside = true)
+                    properties = DialogProperties(dismissOnClickOutside = true),
                 ) {
                     Column(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .background(color = Color.White, shape = RoundedCornerShape(32.dp))
-                            .padding(16.dp)
+                            .padding(16.dp),
                     ) {
                         Text(
                             text = "Are you sure you want to delete your account?",
                             fontSize = 16.sp,
-                            color = Color.Black
+                            color = Color.Black,
                         )
 
                         Spacer(modifier = Modifier.height(24.dp))
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                            horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
                             Button(
                                 onClick = {
@@ -362,12 +368,12 @@ fun ProfileScreen(
                                                             },
                                                             onFailure = { error ->
                                                                 Log.d("MyTag", error)
-                                                            }
+                                                            },
                                                         )
                                                     },
                                                     onFailure = { e ->
                                                         Log.e("DeleteAccount", "Error deleting account: $e")
-                                                    }
+                                                    },
                                                 )
                                             } catch (e: Exception) {
                                                 Log.e("DeleteAccount", "Coroutine exception: ${e.message}")
@@ -376,11 +382,11 @@ fun ProfileScreen(
                                     }
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = MediumPink),
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             ) {
                                 Text(
                                     text = "Confirm",
-                                    color = Color.White
+                                    color = Color.White,
                                 )
                             }
 
@@ -389,11 +395,11 @@ fun ProfileScreen(
                             Button(
                                 onClick = { showDeleteAccountAlert = false },
                                 colors = ButtonDefaults.buttonColors(containerColor = MediumPink),
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             ) {
                                 Text(
                                     text = "Cancel",
-                                    color = Color.White
+                                    color = Color.White,
                                 )
                             }
                         }
@@ -402,9 +408,7 @@ fun ProfileScreen(
             }
         }
     }
-
 }
-
 
 private fun signOut(auth: FirebaseAuth) {
     auth.signOut()
@@ -415,7 +419,7 @@ private fun deleteAccount(
     email: String,
     password: String,
     onSuccess: () -> Unit,
-    onFailure: (String) -> Unit
+    onFailure: (String) -> Unit,
 ) {
     val credential = EmailAuthProvider.getCredential(email, password)
     auth.currentUser?.reauthenticate(credential)?.addOnCompleteListener {
@@ -432,8 +436,3 @@ private fun deleteAccount(
         }
     }
 }
-
-
-
-
-

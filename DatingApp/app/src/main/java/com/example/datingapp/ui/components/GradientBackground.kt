@@ -12,12 +12,12 @@ import androidx.compose.ui.graphics.Color
 fun GradientBackground() {
     val gradientColors = listOf(
         Color(0xFFBC7BE4),
-        Color(0xFFA020F0)
+        Color(0xFFA020F0),
     )
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(brush = Brush.verticalGradient(colors = gradientColors))
+            .background(brush = Brush.verticalGradient(colors = gradientColors)),
     )
 }

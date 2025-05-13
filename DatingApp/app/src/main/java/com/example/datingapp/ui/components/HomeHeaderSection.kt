@@ -23,7 +23,7 @@ fun HomeHeaderSection(isFilterMenuVisible: MutableState<Boolean>) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 35.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Spacer(modifier = Modifier.weight(0.25f))
 
@@ -32,17 +32,17 @@ fun HomeHeaderSection(isFilterMenuVisible: MutableState<Boolean>) {
             contentDescription = "home_app_logo",
             modifier = Modifier
                 .weight(2f)
-                .height(36.dp)
+                .height(36.dp),
         )
 
         IconButton(
             modifier = Modifier.size(30.dp),
-            onClick = { isFilterMenuVisible.value = true }
+            onClick = { isFilterMenuVisible.value = true },
         ) {
             Icon(
                 modifier = Modifier.size(30.dp),
                 painter = painterResource(id = R.drawable.ic_filter),
-                contentDescription = "filter"
+                contentDescription = "filter",
             )
         }
     }

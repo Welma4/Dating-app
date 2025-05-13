@@ -29,21 +29,21 @@ fun BirthDateField(
     birthDate: String,
     isError: Boolean = false,
     onBirthDateChange: (String) -> Unit,
-    navController: NavController
+    navController: NavController,
 ) {
-
     val dateFormatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
     val calendar = remember { Calendar.getInstance() }
-    var selectedDate by remember { mutableStateOf(Calendar.getInstance().apply { set(1990, Calendar.JANUARY, 1)}.time) }
+    var selectedDate by remember { mutableStateOf(Calendar.getInstance().apply { set(1990, Calendar.JANUARY, 1) }.time) }
     val datePickerDialog = android.app.DatePickerDialog(
-        navController.context, { _, year, month, dayOfMonth ->
+        navController.context,
+        { _, year, month, dayOfMonth ->
             calendar.set(year, month, dayOfMonth)
             selectedDate = calendar.time
             onBirthDateChange(dateFormatter.format(selectedDate))
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
+        calendar.get(Calendar.DAY_OF_MONTH),
     )
 
     TextField(
@@ -51,7 +51,7 @@ fun BirthDateField(
         onValueChange = onBirthDateChange,
         trailingIcon = {
             IconButton(onClick = { datePickerDialog.show() }) {
-                Icon(imageVector = Icons.Default.ArrowDropDown , contentDescription = "Calendar")
+                Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Calendar")
             }
         },
         colors = TextFieldDefaults.textFieldColors(
@@ -65,6 +65,6 @@ fun BirthDateField(
         readOnly = true,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(vertical = 8.dp),
     )
 }

@@ -1,6 +1,5 @@
 package com.example.datingapp.ui.screens
 
-import ProfileViewModel
 import android.app.DatePickerDialog
 import android.util.Log
 import androidx.compose.foundation.background
@@ -43,18 +42,18 @@ import com.example.datingapp.ui.components.EditableTextField
 import com.example.datingapp.ui.components.GenderMenu
 import com.example.datingapp.ui.theme.poppinsFontFamily
 import com.example.datingapp.viewmodel.GenderViewModel
+import com.example.datingapp.viewmodel.ProfileViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-
 
 @Composable
 fun EditProfileScreen(
     navController: NavController,
     profileViewModel: ProfileViewModel,
     genderViewModel: GenderViewModel,
-    onSave: (UserEntity) -> Unit
+    onSave: (UserEntity) -> Unit,
 ) {
     val dateFormatter = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
 
@@ -71,7 +70,7 @@ fun EditProfileScreen(
             genderViewModel.getGenderNameById(
                 genderId,
                 onSuccess = { result -> gender = result },
-                onFailure = { error -> Log.d("MyTag", error) }
+                onFailure = { error -> Log.d("MyTag", error) },
             )
         }
     }
@@ -87,35 +86,36 @@ fun EditProfileScreen(
     var selectedDate by remember { mutableStateOf(profileViewModel.user.value.birthDate ?: Date()) }
 
     val datePickerDialog = DatePickerDialog(
-        navController.context, { _, year, month, dayOfMonth ->
+        navController.context,
+        { _, year, month, dayOfMonth ->
             calendar.set(year, month, dayOfMonth)
             selectedDate = calendar.time
             birthDate = dateFormatter.format(selectedDate)
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
+        calendar.get(Calendar.DAY_OF_MONTH),
     )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp)
+                .padding(vertical = 10.dp),
         ) {
             IconButton(
                 onClick = { navController.navigate(Routes.Profile) },
-                modifier = Modifier.background(Color.Transparent)
+                modifier = Modifier.background(Color.Transparent),
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Return to ProfileScreen",
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(30.dp),
                 )
             }
             Text(
@@ -124,9 +124,9 @@ fun EditProfileScreen(
                     fontSize = 18.sp,
                     fontFamily = poppinsFontFamily,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = Color.Black,
                 ),
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 8.dp),
             )
         }
 
@@ -143,12 +143,12 @@ fun EditProfileScreen(
         EditableTextField(
             fieldValue = firstName,
             onValueChange = { firstName = it },
-            fieldName = "First name"
+            fieldName = "First name",
         )
         EditableTextField(
             fieldValue = secondName,
             onValueChange = { secondName = it },
-            fieldName = "Second name"
+            fieldName = "Second name",
         )
         OutlinedTextField(
             modifier = Modifier
@@ -168,7 +168,7 @@ fun EditProfileScreen(
         EditableTextField(
             fieldValue = location,
             onValueChange = { location = it },
-            fieldName = "Location"
+            fieldName = "Location",
         )
 
         GenderMenu(
@@ -179,9 +179,9 @@ fun EditProfileScreen(
                 genderViewModel.getIdByGenderName(
                     selectedGender,
                     onSuccess = { result -> genderId = result },
-                    onFailure = { error -> Log.d("MyTag", error) }
+                    onFailure = { error -> Log.d("MyTag", error) },
                 )
-            }
+            },
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -196,7 +196,7 @@ fun EditProfileScreen(
                     password = profileViewModel.user.value.password,
                     location = location,
                     birthDate = selectedDate,
-                    gender = genderId
+                    gender = genderId,
                 )
                 onSave(updatedUser)
                 navController.navigate(Routes.Profile)
@@ -204,16 +204,15 @@ fun EditProfileScreen(
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFAA3FEC)),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                .height(50.dp),
         ) {
             Text(
                 text = "Save",
                 fontFamily = poppinsFontFamily,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
-                color = Color.White
+                color = Color.White,
             )
         }
     }
 }
-

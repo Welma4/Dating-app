@@ -23,15 +23,14 @@ import com.example.datingapp.data.GenderEntity
 @Composable
 fun GenderDropMenu(
     options: List<GenderEntity>,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
 ) {
-
     var expanded by remember { mutableStateOf(false) }
     var selectedOptionText by remember { mutableStateOf(options.firstOrNull()?.genderName ?: "Male") }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
+        onExpandedChange = { expanded = !expanded },
     ) {
         TextField(
             modifier = Modifier
@@ -41,21 +40,21 @@ fun GenderDropMenu(
             colors = TextFieldDefaults.textFieldColors(
                 containerColor = Color.White,
                 focusedIndicatorColor = Color.Gray,
-                unfocusedIndicatorColor = Color.Gray
+                unfocusedIndicatorColor = Color.Gray,
             ),
             readOnly = true,
             value = selectedOptionText,
             onValueChange = {},
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded
+                    expanded = expanded,
                 )
             },
         )
         ExposedDropdownMenu(
             expanded = expanded,
             modifier = Modifier.width(150.dp),
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
         ) {
             options.forEach { selectionOption ->
                 DropdownMenuItem(
@@ -64,7 +63,7 @@ fun GenderDropMenu(
                         selectedOptionText = selectionOption.genderName
                         expanded = false
                         onValueChange(selectedOptionText)
-                    }
+                    },
                 )
             }
         }

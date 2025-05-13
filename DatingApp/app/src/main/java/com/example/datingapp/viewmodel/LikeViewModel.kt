@@ -10,7 +10,7 @@ class LikeViewModel : ViewModel() {
     fun saveLikeToFirestore(
         likeEntity: LikeEntity,
         onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         val likeCol = db.collection("like")
 
@@ -22,15 +22,13 @@ class LikeViewModel : ViewModel() {
                 if (querySnapshot.isEmpty) {
                     likeCol
                         .add(likeEntity)
-                        .addOnSuccessListener() {
+                        .addOnSuccessListener {
                             onSuccess()
-                        }
-                        .addOnFailureListener() { error ->
+                        }.addOnFailureListener { error ->
                             onFailure(error.message ?: "Error adding like")
                         }
                 }
-            }
-            .addOnFailureListener { error ->
+            }.addOnFailureListener { error ->
                 onFailure(error.message ?: "Error checking existing like")
             }
     }
@@ -38,18 +36,19 @@ class LikeViewModel : ViewModel() {
     fun fetchLikedUsers(
         currentUserId: String,
         onSuccess: (List<String>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
-        db.collection("like")
+        db
+            .collection("like")
             .whereEqualTo("idUser", currentUserId)
             .get()
             .addOnSuccessListener { querySnapshot ->
-                val likedUsers = querySnapshot.documents.mapNotNull { document ->
-                    document.getString("idLikedUser")
-                }
+                val likedUsers =
+                    querySnapshot.documents.mapNotNull { document ->
+                        document.getString("idLikedUser")
+                    }
                 onSuccess(likedUsers.ifEmpty { emptyList() })
-            }
-            .addOnFailureListener { error ->
+            }.addOnFailureListener { error ->
                 onFailure(error.message ?: "Error fetching liked users")
             }
     }
@@ -57,18 +56,19 @@ class LikeViewModel : ViewModel() {
     fun fetchUsersWhoLikedCurrent(
         currentUserId: String,
         onSuccess: (List<String>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
-        db.collection("like")
+        db
+            .collection("like")
             .whereEqualTo("idLikedUser", currentUserId)
             .get()
             .addOnSuccessListener { querySnapshot ->
-                val likedUsers = querySnapshot.documents.mapNotNull { document ->
-                    document.getString("idUser")
-                }
+                val likedUsers =
+                    querySnapshot.documents.mapNotNull { document ->
+                        document.getString("idUser")
+                    }
                 onSuccess(likedUsers.ifEmpty { emptyList() })
-            }
-            .addOnFailureListener { error ->
+            }.addOnFailureListener { error ->
                 onFailure(error.message ?: "Error fetching liked users")
             }
     }

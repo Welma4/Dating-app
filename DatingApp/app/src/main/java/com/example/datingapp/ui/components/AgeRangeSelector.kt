@@ -1,21 +1,31 @@
+package com.example.datingapp.ui.components
+
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.datingapp.ui.theme.MediumPink
 
-
+@Suppress("ktlint:standard:function-naming")
 @Composable
 fun AgeRangeSelector(
     initialRange: Pair<Int, Int>,
-    onRangeSelected: (startAge: Int, endAge: Int) -> Unit
+    onRangeSelected: (startAge: Int, endAge: Int) -> Unit,
 ) {
     var ageRange by remember { mutableStateOf(initialRange.first.toFloat()..initialRange.second.toFloat()) }
 
@@ -29,23 +39,24 @@ fun AgeRangeSelector(
                 val endX = size.width * (ageRange.endInclusive / 100f)
 
                 drawContext.canvas.nativeCanvas.apply {
-                    val paint = Paint().asFrameworkPaint().apply {
-                        isAntiAlias = true
-                        textSize = 14.sp.toPx()
-                        color = android.graphics.Color.GRAY
-                        textAlign = android.graphics.Paint.Align.CENTER
-                    }
+                    val paint =
+                        Paint().asFrameworkPaint().apply {
+                            isAntiAlias = true
+                            textSize = 14.sp.toPx()
+                            color = android.graphics.Color.GRAY
+                            textAlign = android.graphics.Paint.Align.CENTER
+                        }
                     drawText(
                         startAge.toString(),
                         startX,
                         -10f,
-                        paint
+                        paint,
                     )
                     drawText(
                         endAge.toString(),
                         endX,
                         -10f,
-                        paint
+                        paint,
                     )
                 }
             }
@@ -59,10 +70,11 @@ fun AgeRangeSelector(
                 onValueChangeFinished = {
                     onRangeSelected(startAge, endAge)
                 },
-                colors = SliderDefaults.colors(
+                colors =
+                SliderDefaults.colors(
                     thumbColor = MediumPink,
-                    activeTrackColor = MediumPink
-                )
+                    activeTrackColor = MediumPink,
+                ),
             )
         }
     }

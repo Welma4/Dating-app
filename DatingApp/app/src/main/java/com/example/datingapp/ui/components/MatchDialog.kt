@@ -1,6 +1,5 @@
 package com.example.datingapp.ui.components
 
-import ProfileViewModel
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -15,10 +14,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -34,8 +31,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -44,6 +39,7 @@ import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.theme.LikePink
 import com.example.datingapp.ui.theme.MediumPink
 import com.example.datingapp.viewmodel.PhotoViewModel
+import com.example.datingapp.viewmodel.ProfileViewModel
 
 @Composable
 fun MatchDialog(
@@ -52,7 +48,7 @@ fun MatchDialog(
     likedUserId: String,
     onDismiss: () -> Unit,
     photoViewModel: PhotoViewModel,
-    profileViewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
 ) {
     val currentUserPhoto = remember { mutableStateOf<Bitmap?>(null) }
     val likedUserPhoto = remember { mutableStateOf<Bitmap?>(null) }
@@ -66,7 +62,7 @@ fun MatchDialog(
             },
             onFailure = { error ->
                 Log.d("MyTag", "Error loading current user photo: $error")
-            }
+            },
         )
 
         photoViewModel.getPhotoBitmap(
@@ -76,7 +72,7 @@ fun MatchDialog(
             },
             onFailure = { error ->
                 Log.d("MyTag", "Error loading liked user photo: $error")
-            }
+            },
         )
 
         profileViewModel.fetchUserFromFirestore(
@@ -86,20 +82,20 @@ fun MatchDialog(
             },
             onFailure = { error ->
                 Log.d("MyTag", error)
-            }
+            },
         )
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.6f))
+            .background(Color.Black.copy(alpha = 0.6f)),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
-                .background(MediumPink)
+                .background(MediumPink),
         ) {
             Column(
                 modifier = Modifier
@@ -107,27 +103,27 @@ fun MatchDialog(
                     .clip(RoundedCornerShape(20.dp))
                     .padding(20.dp)
                     .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.match_text),
                     contentDescription = "match",
                     modifier = Modifier
                         .height(50.dp)
-                        .fillMaxWidth(0.8f)
+                        .fillMaxWidth(0.8f),
                 )
                 Spacer(modifier = Modifier.height(25.dp))
                 Text(
                     text = "${likedUser.value.firstName} likes you too!",
                     fontSize = 16.sp,
                     color = Color.White,
-                    modifier = Modifier.padding(vertical = 10.dp)
+                    modifier = Modifier.padding(vertical = 10.dp),
                 )
                 Spacer(modifier = Modifier.height(25.dp))
 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     currentUserPhoto.value?.let { bitmap ->
                         Image(
@@ -135,7 +131,7 @@ fun MatchDialog(
                             contentDescription = "currentUserPhoto",
                             modifier = Modifier
                                 .size(110.dp)
-                                .clip(CircleShape)
+                                .clip(CircleShape),
                         )
                     }
                     likedUserPhoto.value?.let { bitmap ->
@@ -144,7 +140,7 @@ fun MatchDialog(
                             contentDescription = "likedUserPhoto",
                             modifier = Modifier
                                 .size(110.dp)
-                                .clip(CircleShape)
+                                .clip(CircleShape),
                         )
                     }
                 }
@@ -153,15 +149,15 @@ fun MatchDialog(
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Button(
-                        onClick = { navController.navigate("Chat/${likedUserId}") },
+                        onClick = { navController.navigate("Chat/$likedUserId") },
                         modifier = Modifier
                             .height(50.dp)
                             .fillMaxWidth(0.9f),
-                        colors = ButtonDefaults.buttonColors(containerColor = LikePink, contentColor = Color.White)
+                        colors = ButtonDefaults.buttonColors(containerColor = LikePink, contentColor = Color.White),
                     ) {
                         Text(
                             text = "SEND A MESSAGE",
-                            fontSize = 18.sp
+                            fontSize = 18.sp,
                         )
                     }
                     Spacer(modifier = Modifier.size(10.dp))
@@ -173,13 +169,13 @@ fun MatchDialog(
                             .border(
                                 width = 5.dp,
                                 color = LikePink,
-                                shape = RoundedCornerShape(28.dp)
+                                shape = RoundedCornerShape(28.dp),
                             ),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = Color.White)
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = Color.White),
                     ) {
                         Text(
                             text = "KEEP SWIPING",
-                            fontSize = 18.sp
+                            fontSize = 18.sp,
                         )
                     }
                 }
@@ -187,5 +183,3 @@ fun MatchDialog(
         }
     }
 }
-
-

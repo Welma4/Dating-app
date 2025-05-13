@@ -5,6 +5,11 @@ plugins {
 
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.plugin.serialization)
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
+}
+
+ktlint {
+    version.set("0.48.2")
 }
 
 android {
@@ -29,7 +34,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -57,7 +62,7 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:2.0.0")
     implementation("com.google.accompanist:accompanist-pager:0.32.0")
-    implementation ("com.google.accompanist:accompanist-pager-indicators:0.32.0")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.32.0")
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlin.serialization.json)

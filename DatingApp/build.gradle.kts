@@ -7,3 +7,10 @@ plugins {
     alias(libs.plugins.compose.compiler) apply true
     alias(libs.plugins.plugin.serialization) apply true
 }
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}

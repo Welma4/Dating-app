@@ -13,12 +13,12 @@ class PhotoViewModel : ViewModel() {
         idUser: String,
         photoBase64: String,
         onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         val db = FirebaseFirestore.getInstance()
         val photoEntity = PhotoEntity(
             idUser = idUser,
-            photoPath = photoBase64
+            photoPath = photoBase64,
         )
 
         db.collection("photo")
@@ -47,7 +47,7 @@ class PhotoViewModel : ViewModel() {
     fun fetchPhotoFromFirestore(
         idUser: String,
         onSuccess: (String) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         val db = FirebaseFirestore.getInstance()
         db.collection("photo")
@@ -81,8 +81,7 @@ class PhotoViewModel : ViewModel() {
             },
             onFailure = {
                 onFailure("No photo found")
-            }
+            },
         )
     }
-
 }

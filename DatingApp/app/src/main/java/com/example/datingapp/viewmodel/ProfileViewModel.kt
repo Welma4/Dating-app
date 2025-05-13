@@ -1,9 +1,10 @@
+package com.example.datingapp.viewmodel
+
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.datingapp.data.UserEntity
 import com.example.datingapp.ui.utils.calculateAge
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -24,7 +25,7 @@ class ProfileViewModel : ViewModel() {
         uid: String,
         userEntity: UserEntity,
         onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         db.collection("user").document(uid)
             .set(userEntity)
@@ -39,7 +40,7 @@ class ProfileViewModel : ViewModel() {
     fun fetchUserFromFirestore(
         uid: String,
         onSuccess: (UserEntity) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         db.collection("user").document(uid)
             .get()
@@ -64,14 +65,14 @@ class ProfileViewModel : ViewModel() {
             },
             onFailure = { error ->
                 Log.e("ProfileViewModel", "Failed to load user: $error")
-            }
+            },
         )
     }
 
     fun fetchUsersExceptCurrent(
         currentUserUid: String,
         onSuccess: (List<UserEntity>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         db.collection("user")
             .get()
@@ -92,7 +93,7 @@ class ProfileViewModel : ViewModel() {
         endAgeRange: Int,
         gender: String,
         onSuccess: (List<UserEntity>) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         db.collection("user")
             .get()
@@ -125,7 +126,7 @@ class ProfileViewModel : ViewModel() {
             "message" to listOf("idUser"),
             "photo" to listOf("idUser"),
             "preferences" to listOf("idUser"),
-            "user" to listOf()
+            "user" to listOf(),
         )
 
         try {
@@ -162,5 +163,4 @@ class ProfileViewModel : ViewModel() {
             onFailure(e)
         }
     }
-
 }

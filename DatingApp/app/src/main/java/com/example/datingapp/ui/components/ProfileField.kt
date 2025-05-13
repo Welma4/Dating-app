@@ -28,22 +28,22 @@ fun ProfileField(label: String, value: String) {
                 .padding(top = 3.dp),
             textStyle = TextStyle(
                 fontSize = 14.sp,
-                fontFamily = poppinsFontFamily
+                fontFamily = poppinsFontFamily,
             ),
             label = {
                 Text(
                     text = label,
                     fontSize = 12.sp,
                     color = Color.Gray,
-                    fontFamily = poppinsFontFamily
+                    fontFamily = poppinsFontFamily,
                 )
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedLabelColor = Color.Gray,
                 focusedLabelColor = Color.Gray,
                 disabledTextColor = Color.Black,
-                disabledBorderColor = Color.Gray
-            )
+                disabledBorderColor = Color.Gray,
+            ),
         )
     }
 }

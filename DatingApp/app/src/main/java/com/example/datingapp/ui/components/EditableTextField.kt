@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 fun EditableTextField(
     fieldValue: String,
     onValueChange: (String) -> Unit,
-    fieldName: String
+    fieldName: String,
 ) {
     OutlinedTextField(
         value = fieldValue,
@@ -20,6 +20,6 @@ fun EditableTextField(
         label = { Text(fieldName) },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp)
+            .padding(bottom = 8.dp),
     )
 }

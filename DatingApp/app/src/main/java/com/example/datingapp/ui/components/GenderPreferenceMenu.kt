@@ -23,7 +23,7 @@ fun GenderPreferenceMenu(selectedGender: String, onGenderSelected: (String) -> U
         modifier = Modifier
             .border(1.dp, Color.Gray, RoundedCornerShape(40))
             .clip(RoundedCornerShape(40))
-            .fillMaxWidth()
+            .fillMaxWidth(),
     ) {
         Row(
             modifier = Modifier
@@ -32,7 +32,7 @@ fun GenderPreferenceMenu(selectedGender: String, onGenderSelected: (String) -> U
                 .clickable(onClick = { onGenderSelected("Male") })
                 .padding(vertical = 10.dp),
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "Male",
@@ -46,7 +46,7 @@ fun GenderPreferenceMenu(selectedGender: String, onGenderSelected: (String) -> U
                 .clickable(onClick = { onGenderSelected("Female") })
                 .padding(vertical = 10.dp),
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "Female",

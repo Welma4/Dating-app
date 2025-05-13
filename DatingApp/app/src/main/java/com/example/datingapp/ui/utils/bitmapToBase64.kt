@@ -10,4 +10,3 @@ fun bitmapToBase64(bitmap: Bitmap): String {
     val byteArray = outputStream.toByteArray()
     return Base64.encodeToString(byteArray, Base64.DEFAULT)
 }
-

@@ -35,14 +35,14 @@ fun PasswordField(password: String, isError: Boolean = false, onPasswordChange: 
                     isFocused -> Color.Gray
                     isError -> Color.Red
                     else -> Color.Gray
-                }
+                },
             )
         },
         visualTransformation = PasswordVisualTransformation(),
         colors = TextFieldDefaults.textFieldColors(
             containerColor = Color.White,
             focusedIndicatorColor = Color.Gray,
-            unfocusedIndicatorColor = if (isError) Color.Red else Color.Gray
+            unfocusedIndicatorColor = if (isError) Color.Red else Color.Gray,
         ),
         modifier = Modifier
             .fillMaxWidth()

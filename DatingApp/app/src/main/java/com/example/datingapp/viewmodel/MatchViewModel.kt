@@ -1,9 +1,7 @@
 package com.example.datingapp.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -17,7 +15,7 @@ class MatchViewModel : ViewModel() {
         likedUserId: String,
         onMatchFound: () -> Unit,
         onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         val likeCol = db.collection("like")
         val matchCol = db.collection("match")
@@ -38,40 +36,37 @@ class MatchViewModel : ViewModel() {
                                 .get()
                                 .addOnSuccessListener { mutualLikeSnapshot ->
                                     if (!mutualLikeSnapshot.isEmpty) {
-                                        val matchData = hashMapOf(
-                                            "idFirstUser" to currentUserId,
-                                            "idSecondUser" to likedUserId,
-                                            "status" to statusId
-                                        )
+                                        val matchData =
+                                            hashMapOf(
+                                                "idFirstUser" to currentUserId,
+                                                "idSecondUser" to likedUserId,
+                                                "status" to statusId,
+                                            )
                                         matchCol
                                             .add(matchData)
                                             .addOnSuccessListener {
                                                 onMatchFound()
                                                 onSuccess()
-                                            }
-                                            .addOnFailureListener { error ->
+                                            }.addOnFailureListener { error ->
                                                 onFailure(error.message ?: "Error creating match")
                                             }
                                     } else {
                                         onSuccess()
                                     }
-                                }
-                                .addOnFailureListener { error ->
+                                }.addOnFailureListener { error ->
                                     onFailure(error.message ?: "Error checking for mutual like")
                                 }
                         } else {
                             Log.d("MyTag", "Match already exists")
                             onSuccess()
                         }
-                    }
-                    .addOnFailureListener { error ->
+                    }.addOnFailureListener { error ->
                         onFailure(error.message ?: "Error checking for existing match")
                     }
             },
             onFailure = { error ->
                 onFailure(error)
-            }
+            },
         )
     }
-
 }

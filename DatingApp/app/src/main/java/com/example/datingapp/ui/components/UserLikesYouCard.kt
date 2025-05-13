@@ -54,9 +54,8 @@ fun UserLikesYouCard(
     likeViewModel: LikeViewModel,
     matchViewModel: MatchViewModel,
     chatViewModel: ChatViewModel,
-    onMatch: (String) -> Unit
+    onMatch: (String) -> Unit,
 ) {
-
     var showLikeIcon by remember { mutableStateOf(false) }
     var isLiked by remember { mutableStateOf(false) }
 
@@ -69,18 +68,18 @@ fun UserLikesYouCard(
                     showLikeIcon = true
                 }
             },
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = CardDefaults.cardElevation(4.dp),
     ) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize(),
         ) {
             if (photo != null) {
                 Image(
                     bitmap = photo.asImageBitmap(),
                     contentDescription = "${user.firstName}'s photo",
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
                 )
             }
 
@@ -88,7 +87,7 @@ fun UserLikesYouCard(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(LikePinkAlpha)
+                        .background(LikePinkAlpha),
                 ) {}
             }
 
@@ -98,14 +97,14 @@ fun UserLikesYouCard(
                         .fillMaxSize()
                         .background(if (!isLiked) Color.Black.copy(alpha = 0.5f) else LikePinkAlpha),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_heart),
                         contentDescription = "like_icon",
                         modifier = Modifier
                             .size(65.dp)
-                            .clickable{
+                            .clickable {
                                 showLikeIcon = false
                                 isLiked = true
                                 likeViewModel.saveLikeToFirestore(
@@ -124,7 +123,7 @@ fun UserLikesYouCard(
                                                     },
                                                     onFailure = { error ->
                                                         Log.d("MyTag", error)
-                                                    }
+                                                    },
                                                 )
                                             },
                                             onSuccess = {
@@ -132,15 +131,15 @@ fun UserLikesYouCard(
                                             },
                                             onFailure = { error ->
                                                 Log.e("MyTag", "Match creation failed: $error")
-                                            }
+                                            },
                                         )
                                     },
                                     onFailure = { error ->
                                         Log.d("MyTag", "Like save error: $error")
-                                    }
+                                    },
                                 )
                             },
-                        tint = LikePink
+                        tint = LikePink,
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Icon(
@@ -148,10 +147,10 @@ fun UserLikesYouCard(
                         contentDescription = "cancel_icon",
                         modifier = Modifier
                             .size(65.dp)
-                            .clickable{
-                                showLikeIcon = false;
+                            .clickable {
+                                showLikeIcon = false
                             },
-                        tint = Color.Red
+                        tint = Color.Red,
                     )
                 }
             }
@@ -161,21 +160,21 @@ fun UserLikesYouCard(
                     .fillMaxSize()
                     .padding(6.dp),
                 verticalArrangement = Arrangement.Bottom,
-                horizontalAlignment = Alignment.Start
+                horizontalAlignment = Alignment.Start,
             ) {
                 Text(
                     text = "${user.firstName} ${user.secondName}, ${calculateAge(user.birthDate!!)}",
                     color = Color.White,
                     textAlign = TextAlign.Center,
                     fontSize = 14.sp,
-                    style = TextStyle(shadow = Shadow(MediumGray, Offset(5.0f, 2.0f), 1.0f))
+                    style = TextStyle(shadow = Shadow(MediumGray, Offset(5.0f, 2.0f), 1.0f)),
                 )
                 Text(
                     text = user.location,
                     color = Color.White,
                     textAlign = TextAlign.Center,
                     fontSize = 14.sp,
-                    style = TextStyle(shadow = Shadow(MediumGray, Offset(5.0f, 2.0f), 1.0f))
+                    style = TextStyle(shadow = Shadow(MediumGray, Offset(5.0f, 2.0f), 1.0f)),
                 )
             }
         }

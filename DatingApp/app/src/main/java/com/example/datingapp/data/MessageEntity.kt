@@ -6,5 +6,5 @@ data class MessageEntity(
     val idUser: String = "",
     val sendTime: String = getCurrentTime(),
     val idChat: String = "",
-    val messageText: String = ""
+    val messageText: String = "",
 )

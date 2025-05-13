@@ -19,11 +19,11 @@ fun ChatList(
     chatList: List<ChatEntity>,
     currentUserId: String,
     userNameMap: Map<String, String>,
-    userPhotoMap: Map<String, Bitmap?>
+    userPhotoMap: Map<String, Bitmap?>,
 ) {
     LazyColumn(
         modifier = Modifier.padding(8.dp).background(color = Color.Transparent),
-        contentPadding = PaddingValues(bottom = 16.dp)
+        contentPadding = PaddingValues(bottom = 16.dp),
     ) {
         items(chatList) { chat ->
             ChatItem(navController, chat, currentUserId, userNameMap, userPhotoMap)

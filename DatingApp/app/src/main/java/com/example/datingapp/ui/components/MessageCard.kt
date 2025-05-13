@@ -20,18 +20,17 @@ import com.example.datingapp.data.MessageEntity
 import com.example.datingapp.ui.theme.GrayBlue
 import com.example.datingapp.ui.theme.MediumPink
 import com.example.datingapp.ui.utils.formatTimeToHHmm
-import com.example.datingapp.ui.utils.formatTimeToMdHm
 
 @Composable
 fun MessageCard(
     message: MessageEntity,
-    isFromCurrent: Boolean
+    isFromCurrent: Boolean,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        horizontalArrangement = if (isFromCurrent) Arrangement.End else Arrangement.Start
+        horizontalArrangement = if (isFromCurrent) Arrangement.End else Arrangement.Start,
     ) {
         if (isFromCurrent) {
             Text(
@@ -40,7 +39,7 @@ fun MessageCard(
                 color = Color.Gray,
                 modifier = Modifier
                     .padding(end = 8.dp)
-                    .align(Alignment.Bottom)
+                    .align(Alignment.Bottom),
             )
         }
         Card(
@@ -49,16 +48,16 @@ fun MessageCard(
                 .wrapContentHeight(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = if (isFromCurrent) MediumPink else GrayBlue
-            )
+                containerColor = if (isFromCurrent) MediumPink else GrayBlue,
+            ),
         ) {
             Column(
-                modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
+                modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp),
             ) {
                 Text(
                     text = message.messageText,
                     fontSize = 14.sp,
-                    color = if (isFromCurrent) Color.White else Color.Black
+                    color = if (isFromCurrent) Color.White else Color.Black,
                 )
             }
         }
@@ -70,7 +69,7 @@ fun MessageCard(
                 color = Color.Gray,
                 modifier = Modifier
                     .align(Alignment.Bottom)
-                    .padding(start = 8.dp)
+                    .padding(start = 8.dp),
             )
         }
     }

@@ -7,7 +7,7 @@ import com.example.datingapp.data.PreferencesEntity
 import com.google.firebase.firestore.FirebaseFirestore
 
 class PreferencesViewModel : ViewModel() {
-    private  val db = FirebaseFirestore.getInstance()
+    private val db = FirebaseFirestore.getInstance()
 
     private val _preferences = MutableLiveData<PreferencesEntity>()
     val preferences: LiveData<PreferencesEntity> get() = _preferences
@@ -15,7 +15,7 @@ class PreferencesViewModel : ViewModel() {
     fun savePreferencesToFirestore(
         preferencesEntity: PreferencesEntity,
         onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         val prefCol = db.collection("preferences")
 
@@ -36,8 +36,7 @@ class PreferencesViewModel : ViewModel() {
                         .addOnSuccessListener { onSuccess() }
                         .addOnFailureListener { e -> onFailure(e.message ?: "Error adding preferences") }
                 }
-            }
-            .addOnFailureListener { e ->
+            }.addOnFailureListener { e ->
                 onFailure(e.message ?: "Error checking existing preferences")
             }
     }
@@ -45,7 +44,7 @@ class PreferencesViewModel : ViewModel() {
     fun fetchPreferencesForUser(
         idUser: String,
         onSuccess: (PreferencesEntity) -> Unit,
-        onFailure: (String) -> Unit
+        onFailure: (String) -> Unit,
     ) {
         val prefCol = db.collection("preferences")
 
@@ -65,10 +64,8 @@ class PreferencesViewModel : ViewModel() {
                 } else {
                     onFailure("Preferences not found")
                 }
-            }
-            .addOnFailureListener { e ->
+            }.addOnFailureListener { e ->
                 onFailure(e.message ?: "Error fetching preferences")
             }
     }
-
 }
